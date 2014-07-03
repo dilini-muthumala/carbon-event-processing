@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
+    <file url="file://$PROJECT_DIR$/components/event-monitor" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/components/event-monitor/event-flow" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/components/event-monitor/event-statistics" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/components/event-monitor/event-tracer" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/features/event-monitor" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/features/event-monitor/event-flow" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/features/event-monitor/event-statistics" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/features/event-monitor/event-tracer" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/features/event-processor" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/features/event-stream/event-simulator" charset="UTF-8" />
+  </component>
+</project>
+

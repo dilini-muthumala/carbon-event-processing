@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-adaptor-utils/org.wso2.carbon.event.adaptor.utils.websocket.server" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.core" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.email" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.file" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.http" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.jms" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.kafka" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.manager.admin" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.manager.core" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.manager.ui" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.soap" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-input-adaptor/org.wso2.carbon.event.input.adaptor.wso2event" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.cassandra" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.core" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.email" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.http" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.jms" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.kafka" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.logger" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.manager.admin" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.manager.core" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.manager.ui" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.mysql" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.sms" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.soap" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.websocket" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/adaptors/event-output-adaptor/org.wso2.carbon.event.output.adaptor.wso2event" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-monitor/event-flow/org.wso2.carbon.event.flow" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-monitor/event-flow/org.wso2.carbon.event.flow.ui" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-monitor/event-statistics/org.wso2.carbon.event.statistics" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-monitor/event-statistics/org.wso2.carbon.event.statistics.ui" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-monitor/event-tracer/org.wso2.carbon.event.tracer" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-monitor/event-tracer/org.wso2.carbon.event.tracer.ui" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-processor/org.wso2.carbon.event.processor.admin" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-processor/org.wso2.carbon.event.processor.core" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-processor/org.wso2.carbon.event.processor.siddhi.extension" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-processor/org.wso2.carbon.event.processor.ui" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-builder/org.wso2.carbon.event.builder.admin" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-builder/org.wso2.carbon.event.builder.core" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-builder/org.wso2.carbon.event.builder.ui" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-formatter/org.wso2.carbon.event.formatter.admin" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-formatter/org.wso2.carbon.event.formatter.core" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-formatter/org.wso2.carbon.event.formatter.ui" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-simulator/org.wso2.carbon.event.simulator.admin" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-simulator/org.wso2.carbon.event.simulator.core" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-simulator/org.wso2.carbon.event.simulator.ui" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-stream-manager/org.wso2.carbon.event.stream.manager.admin" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-stream-manager/org.wso2.carbon.event.stream.manager.core" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/components/event-stream/event-stream-manager/org.wso2.carbon.event.stream.manager.ui" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/service-stubs/org.wso2.carbon.event.builder.stub" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/service-stubs/org.wso2.carbon.event.flow.stub" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/service-stubs/org.wso2.carbon.event.formatter.stub" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/service-stubs/org.wso2.carbon.event.input.adaptor.manager.stub" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/service-stubs/org.wso2.carbon.event.output.adaptor.manager.stub" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/service-stubs/org.wso2.carbon.event.processor.stub" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/service-stubs/org.wso2.carbon.event.simulator.stub" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/service-stubs/org.wso2.carbon.event.statistics.stub" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/service-stubs/org.wso2.carbon.event.stream.manager.stub" />
+    <file type="Osmorc" url="file://$PROJECT_DIR$/service-stubs/org.wso2.carbon.event.tracer.stub" />
+  </component>
+  <component name="IdProvider" IDEtalkID="415F82574B56051305FEEBC223C77937" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.7" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/classes" />
+  </component>
+  <component name="SvnBranchConfigurationManager">
+    <option name="mySupportsUserInfoFilter" value="true" />
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.7</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>
+

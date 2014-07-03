@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <option name="DEFAULT_COMPILER" value="Javac" />
+    <resourceExtensions />
+    <wildcardResourcePatterns>
+      <entry name="!?*.java" />
+      <entry name="!?*.form" />
+      <entry name="!?*.class" />
+      <entry name="!?*.groovy" />
+      <entry name="!?*.scala" />
+      <entry name="!?*.flex" />
+      <entry name="!?*.kt" />
+      <entry name="!?*.clj" />
+    </wildcardResourcePatterns>
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="org.wso2.carbon.event.adaptor.utils.websocket.server" />
+        <module name="org.wso2.carbon.event.builder.admin" />
+        <module name="org.wso2.carbon.event.builder.core" />
+        <module name="org.wso2.carbon.event.builder.stub" />
+        <module name="org.wso2.carbon.event.builder.ui" />
+        <module name="org.wso2.carbon.event.flow" />
+        <module name="org.wso2.carbon.event.flow.stub" />
+        <module name="org.wso2.carbon.event.flow.ui" />
+        <module name="org.wso2.carbon.event.formatter.admin" />
+        <module name="org.wso2.carbon.event.formatter.core" />
+        <module name="org.wso2.carbon.event.formatter.stub" />
+        <module name="org.wso2.carbon.event.formatter.ui" />
+        <module name="org.wso2.carbon.event.input.adaptor.core" />
+        <module name="org.wso2.carbon.event.input.adaptor.email" />
+        <module name="org.wso2.carbon.event.input.adaptor.file" />
+        <module name="org.wso2.carbon.event.input.adaptor.http" />
+        <module name="org.wso2.carbon.event.input.adaptor.jms" />
+        <module name="org.wso2.carbon.event.input.adaptor.kafka" />
+        <module name="org.wso2.carbon.event.input.adaptor.manager.admin" />
+        <module name="org.wso2.carbon.event.input.adaptor.manager.core" />
+        <module name="org.wso2.carbon.event.input.adaptor.manager.stub" />
+        <module name="org.wso2.carbon.event.input.adaptor.manager.ui" />
+        <module name="org.wso2.carbon.event.input.adaptor.soap" />
+        <module name="org.wso2.carbon.event.input.adaptor.wso2event" />
+        <module name="org.wso2.carbon.event.output.adaptor.cassandra" />
+        <module name="org.wso2.carbon.event.output.adaptor.core" />
+        <module name="org.wso2.carbon.event.output.adaptor.email" />
+        <module name="org.wso2.carbon.event.output.adaptor.http" />
+        <module name="org.wso2.carbon.event.output.adaptor.jms" />
+        <module name="org.wso2.carbon.event.output.adaptor.kafka" />
+        <module name="org.wso2.carbon.event.output.adaptor.logger" />
+        <module name="org.wso2.carbon.event.output.adaptor.manager.admin" />
+        <module name="org.wso2.carbon.event.output.adaptor.manager.core" />
+        <module name="org.wso2.carbon.event.output.adaptor.manager.stub" />
+        <module name="org.wso2.carbon.event.output.adaptor.manager.ui" />
+        <module name="org.wso2.carbon.event.output.adaptor.mysql" />
+        <module name="org.wso2.carbon.event.output.adaptor.sms" />
+        <module name="org.wso2.carbon.event.output.adaptor.soap" />
+        <module name="org.wso2.carbon.event.output.adaptor.websocket" />
+        <module name="org.wso2.carbon.event.output.adaptor.wso2event" />
+        <module name="org.wso2.carbon.event.processor.admin" />
+        <module name="org.wso2.carbon.event.processor.core" />
+        <module name="org.wso2.carbon.event.processor.siddhi.extension" />
+        <module name="org.wso2.carbon.event.processor.stub" />
+        <module name="org.wso2.carbon.event.processor.ui" />
+        <module name="org.wso2.carbon.event.simulator.admin" />
+        <module name="org.wso2.carbon.event.simulator.core" />
+        <module name="org.wso2.carbon.event.simulator.stub" />
+        <module name="org.wso2.carbon.event.simulator.ui" />
+        <module name="org.wso2.carbon.event.statistics" />
+        <module name="org.wso2.carbon.event.statistics.stub" />
+        <module name="org.wso2.carbon.event.statistics.ui" />
+        <module name="org.wso2.carbon.event.stream.manager.admin" />
+        <module name="org.wso2.carbon.event.stream.manager.core" />
+        <module name="org.wso2.carbon.event.stream.manager.stub" />
+        <module name="org.wso2.carbon.event.stream.manager.ui" />
+        <module name="org.wso2.carbon.event.tracer" />
+        <module name="org.wso2.carbon.event.tracer.stub" />
+        <module name="org.wso2.carbon.event.tracer.ui" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="adaptors" target="1.6" />
+      <module name="carbon-event-processing" target="1.6" />
+      <module name="event-adaptor-utils" target="1.6" />
+      <module name="event-adaptors-feature" target="1.6" />
+      <module name="event-builder" target="1.6" />
+      <module name="event-builder-feature" target="1.6" />
+      <module name="event-flow" target="1.6" />
+      <module name="event-flow-feature" target="1.6" />
+      <module name="event-formatter" target="1.6" />
+      <module name="event-formatter-feature" target="1.6" />
+      <module name="event-input-adaptor" target="1.6" />
+      <module name="event-input-adaptor-feature" target="1.6" />
+      <module name="event-monitor" target="1.6" />
+      <module name="event-monitor-feature" target="1.6" />
+      <module name="event-output-adaptor" target="1.6" />
+      <module name="event-output-adaptor-feature" target="1.6" />
+      <module name="event-processor" target="1.6" />
+      <module name="event-processor-feature" target="1.6" />
+      <module name="event-simulator" target="1.6" />
+      <module name="event-simulator-feature" target="1.6" />
+      <module name="event-statistics" target="1.6" />
+      <module name="event-statistics-feature" target="1.6" />
+      <module name="event-stream" target="1.6" />
+      <module name="event-stream-feature" target="1.6" />
+      <module name="event-stream-manager" target="1.6" />
+      <module name="event-stream-manager-feature" target="1.6" />
+      <module name="event-tracer" target="1.6" />
+      <module name="event-tracer-feature" target="1.6" />
+      <module name="org.wso2.carbon.event.adaptor.utils.websocket.server" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.admin" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.core" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.stub" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.builder.ui.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.flow" target="1.6" />
+      <module name="org.wso2.carbon.event.flow.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.flow.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.flow.stub" target="1.6" />
+      <module name="org.wso2.carbon.event.flow.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.flow.ui.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.formatter.admin" target="1.6" />
+      <module name="org.wso2.carbon.event.formatter.core" target="1.6" />
+      <module name="org.wso2.carbon.event.formatter.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.formatter.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.formatter.stub" target="1.6" />
+      <module name="org.wso2.carbon.event.formatter.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.formatter.ui.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.core" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.email" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.email.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.file" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.file.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.http" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.http.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.jms" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.jms.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.kafka" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.kafka.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.manager.admin" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.manager.core" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.manager.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.manager.stub" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.manager.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.manager.ui.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.soap" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.soap.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.wso2event" target="1.6" />
+      <module name="org.wso2.carbon.event.input.adaptor.wso2event.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.cassandra" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.cassandra.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.core" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.email" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.email.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.http" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.http.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.jms" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.jms.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.kafka" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.kafka.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.logger" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.logger.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.manager.admin" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.manager.core" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.manager.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.manager.stub" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.manager.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.manager.ui.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.mysql" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.mysql.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.sms" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.sms.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.soap" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.soap.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.websocket" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.wso2event" target="1.6" />
+      <module name="org.wso2.carbon.event.output.adaptor.wso2event.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.admin" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.core" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.siddhi.extension" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.stub" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.processor.ui.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.simulator.admin" target="1.6" />
+      <module name="org.wso2.carbon.event.simulator.core" target="1.6" />
+      <module name="org.wso2.carbon.event.simulator.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.simulator.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.simulator.stub" target="1.6" />
+      <module name="org.wso2.carbon.event.simulator.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.simulator.ui.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.statistics" target="1.6" />
+      <module name="org.wso2.carbon.event.statistics.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.statistics.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.statistics.stub" target="1.6" />
+      <module name="org.wso2.carbon.event.statistics.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.statistics.ui.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.stream.manager.admin" target="1.6" />
+      <module name="org.wso2.carbon.event.stream.manager.core" target="1.6" />
+      <module name="org.wso2.carbon.event.stream.manager.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.stream.manager.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.stream.manager.stub" target="1.6" />
+      <module name="org.wso2.carbon.event.stream.manager.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.stream.manager.ui.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.tracer" target="1.6" />
+      <module name="org.wso2.carbon.event.tracer.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.tracer.server.feature" target="1.6" />
+      <module name="org.wso2.carbon.event.tracer.stub" target="1.6" />
+      <module name="org.wso2.carbon.event.tracer.ui" target="1.6" />
+      <module name="org.wso2.carbon.event.tracer.ui.feature" target="1.6" />
+      <module name="service-stubs" target="1.6" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
+

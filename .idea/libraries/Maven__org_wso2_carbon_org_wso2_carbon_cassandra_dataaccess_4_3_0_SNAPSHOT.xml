@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.wso2.carbon:org.wso2.carbon.cassandra.dataaccess:4.3.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/carbon/org.wso2.carbon.cassandra.dataaccess/4.3.0-SNAPSHOT/org.wso2.carbon.cassandra.dataaccess-4.3.0-20140703.060947-99.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/carbon/org.wso2.carbon.cassandra.dataaccess/4.3.0-SNAPSHOT/org.wso2.carbon.cassandra.dataaccess-4.3.0-20140703.060947-99-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/carbon/org.wso2.carbon.cassandra.dataaccess/4.3.0-SNAPSHOT/org.wso2.carbon.cassandra.dataaccess-4.3.0-20140703.060947-99-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
