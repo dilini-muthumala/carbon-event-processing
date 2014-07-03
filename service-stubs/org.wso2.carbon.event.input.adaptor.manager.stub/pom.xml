@@ -69,6 +69,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
                 <executions>
                     <execution>
                         <id>add-source</id>
@@ -96,7 +97,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.event.input.adaptor.manager.stub.*;version="1.0.1",
+                            org.wso2.carbon.event.input.adaptor.manager.stub.*;version="${carbon.event.processing.version}",
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.namespace,
@@ -119,10 +120,11 @@
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.axiom.wso2</groupId>
+            <artifactId>axiom</artifactId>
+        </dependency>
     </dependencies>
 
-    <!--properties>
-        <cep.service.stub.export.version>1.0.1</cep.service.stub.export.version>
-    </properties-->
 </project>
 
