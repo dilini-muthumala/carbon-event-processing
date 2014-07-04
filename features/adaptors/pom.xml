@@ -33,7 +33,7 @@
     <modules>
         <module>event-input-adaptor</module>
         <module>event-output-adaptor</module>
-        
+        <module>event-adaptor-utils</module>
     </modules>
 
 
