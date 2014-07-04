@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>event-monitor</artifactId>
-        <version>1.0.0</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -22,55 +22,55 @@
     <groupId>org.wso2.carbon</groupId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Event Statistics Aggregator Module</name>
-    <version>1.0.0</version>
+    <version>2.0.0-SNAPSHOT</version>
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.event.statistics/1.0.1</module>
-        <module>org.wso2.carbon.event.statistics.ui/1.0.1</module>
+        <module>org.wso2.carbon.event.statistics</module>
+        <module>org.wso2.carbon.event.statistics.ui</module>
     </modules>
 
 
-    <dependencyManagement>
+    
         <dependencies>
             <dependency>
                 <groupId>org.eclipse.osgi</groupId>
                 <artifactId>org.eclipse.osgi</artifactId>
-                <version>${version.equinox.osgi}</version>
+                
             </dependency>
             <dependency>
                 <groupId>org.eclipse.osgi</groupId>
                 <artifactId>org.eclipse.osgi.services</artifactId>
-                <version>${version.equinox.osgi.services}</version>
+                
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.logging</artifactId>
-                <version>${carbon.platform.version}</version>
+                
             </dependency>
 
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
-                <version>${carbon.platform.version}</version>
+                
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.utils</artifactId>
-                <version>${carbon.platform.version}</version>
+                
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
+                
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.ui</artifactId>
-                <version>${carbon.platform.version}</version>
+                
             </dependency>
         </dependencies>
-    </dependencyManagement>
+    
 
 
 </project>	
