@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/org.wso2.carbon.event.adaptor.utils.websocket.websocketapp.iml" filepath="$PROJECT_DIR$/org.wso2.carbon.event.adaptor.utils.websocket.websocketapp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.wso2.carbon.event.input.adaptor.websocket.endpoint.iml" filepath="$PROJECT_DIR$/org.wso2.carbon.event.input.adaptor.websocket.endpoint.iml" />
+    </modules>
+  </component>
+</project>
+

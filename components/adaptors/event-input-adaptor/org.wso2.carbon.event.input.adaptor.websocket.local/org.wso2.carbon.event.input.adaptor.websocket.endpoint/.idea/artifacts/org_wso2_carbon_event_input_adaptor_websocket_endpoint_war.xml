@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="org.wso2.carbon.event.input.adaptor.websocket.endpoint:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="inputwebsocket.war">
+      <element id="artifact" artifact-name="org.wso2.carbon.event.input.adaptor.websocket.endpoint:war exploded" />
+    </root>
+  </artifact>
+</component>

@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="org.wso2.carbon.event.input.adaptor.websocket.endpoint:war exploded">
+    <output-path>$PROJECT_DIR$/target/inputwebsocket</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="org.wso2.carbon.event.input.adaptor.websocket.endpoint/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="org.wso2.carbon.event.input.adaptor.websocket.endpoint" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>
