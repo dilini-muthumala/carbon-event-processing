@@ -1,42 +1,45 @@
-/**
- * Copyright (c) 2005 - 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- * <p/>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+/*
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.processor.core;
 
 import org.wso2.carbon.event.processor.core.internal.ha.HAManager;
+import org.wso2.carbon.event.processor.core.internal.storm.SiddhiStormOutputEventListener;
 import org.wso2.carbon.event.stream.manager.core.EventProducer;
 import org.wso2.carbon.event.stream.manager.core.SiddhiEventConsumer;
-import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.ExecutionPlanRuntime;
 
 import java.util.ArrayList;
 import java.util.List;
 
 // acts as a holder for the components of a query plan.
 public class ExecutionPlan {
-    private SiddhiManager siddhiManager;
+    private ExecutionPlanRuntime executionPlanRuntime;
     private ExecutionPlanConfiguration executionPlanConfiguration;
     private String name;
     private HAManager haManager;
     private List<EventProducer> eventProducers = new ArrayList<EventProducer>();
     private List<SiddhiEventConsumer> siddhiEventConsumers = new ArrayList<SiddhiEventConsumer>();
+    private SiddhiStormOutputEventListener stormOutputListener;
 
 
-    public ExecutionPlan(String name, SiddhiManager siddhiManager,
+    public ExecutionPlan(String name, ExecutionPlanRuntime executionPlanRuntime,
                          ExecutionPlanConfiguration executionPlanConfiguration, HAManager haManager) {
-        this.siddhiManager = siddhiManager;
+        this.executionPlanRuntime = executionPlanRuntime;
         this.executionPlanConfiguration = executionPlanConfiguration;
         this.name = name;
         this.haManager = haManager;
@@ -50,12 +53,12 @@ public class ExecutionPlan {
         this.name = name;
     }
 
-    public SiddhiManager getSiddhiManager() {
-        return siddhiManager;
+    public ExecutionPlanRuntime getExecutionPlanRuntime() {
+        return executionPlanRuntime;
     }
 
-    public void setSiddhiManager(SiddhiManager siddhiManager) {
-        this.siddhiManager = siddhiManager;
+    public void setExecutionPlanRuntime(ExecutionPlanRuntime executionPlanRuntime) {
+        this.executionPlanRuntime = executionPlanRuntime;
     }
 
     public ExecutionPlanConfiguration getExecutionPlanConfiguration() {
@@ -79,7 +82,13 @@ public class ExecutionPlan {
         if (haManager != null) {
             haManager.shutdown();
         }
-        siddhiManager.shutdown();
+        if(stormOutputListener!=null){
+            stormOutputListener.shutdown();
+        }
+        for(SiddhiEventConsumer siddhiEventConsumer:siddhiEventConsumers){
+            siddhiEventConsumer.shutdown();
+        }
+        executionPlanRuntime.shutdown();
     }
 
     public void addProducer(EventProducer producer) {
@@ -97,5 +106,9 @@ public class ExecutionPlan {
 
     public List<SiddhiEventConsumer> getSiddhiEventConsumers() {
         return siddhiEventConsumers;
+    }
+
+    public void addStormOutputListener(SiddhiStormOutputEventListener stormOutputListener) {
+        this.stormOutputListener = stormOutputListener;
     }
 }

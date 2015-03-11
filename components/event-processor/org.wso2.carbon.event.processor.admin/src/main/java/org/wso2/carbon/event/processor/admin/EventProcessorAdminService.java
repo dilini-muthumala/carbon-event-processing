@@ -1,3 +1,20 @@
+/*
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.processor.admin;
 
 import org.apache.axis2.AxisFault;
@@ -28,7 +45,7 @@ public class EventProcessorAdminService extends AbstractAdmin {
     public void deployExecutionPlanConfiguration(ExecutionPlanConfigurationDto configurationDto)
             throws AxisFault {
         EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
-        if (eventProcessorService != null && checkExecutionPlanValidity(configurationDto.getName())) {
+        if (eventProcessorService != null) {
             ExecutionPlanConfiguration configuration = new ExecutionPlanConfiguration();
             copyConfigurationsFromDto(configuration, configurationDto);
 
@@ -354,6 +371,7 @@ public class EventProcessorAdminService extends AbstractAdmin {
         dto.setQueryExpressions(config.getQueryExpressions());
         dto.setStatisticsEnabled(config.isStatisticsEnabled());
         dto.setTracingEnabled(config.isTracingEnabled());
+        dto.setEditable(config.isEditable());
         if (config.getSiddhiConfigurationProperties() != null) {
             SiddhiConfigurationDto[] siddhiConfigs = new SiddhiConfigurationDto[config.getSiddhiConfigurationProperties().size()];
             int i = 0;
@@ -386,24 +404,6 @@ public class EventProcessorAdminService extends AbstractAdmin {
             }
             dto.setExportedStreams(exportedStreamDtos);
         }
-    }
-
-    private boolean checkExecutionPlanValidity(String executionPlanName)
-            throws AxisFault {
-
-        EventProcessorService eventProcessorService = EventProcessorAdminValueHolder.getEventProcessorService();
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        Map<String, ExecutionPlanConfiguration> executionPlanConfigurationMap;
-        executionPlanConfigurationMap = eventProcessorService.getAllActiveExecutionConfigurations(tenantId);
-        if (executionPlanConfigurationMap != null) {
-            for (String executionPlan : executionPlanConfigurationMap.keySet()) {
-                if (executionPlanName.equalsIgnoreCase(executionPlan)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
 }

@@ -1,27 +1,27 @@
-/**
- * Copyright (c) 2005 - 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- * <p/>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
+/*
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.processor.core.internal.ha;
 
 import com.hazelcast.core.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.event.processor.core.internal.ha.thrift.HAServiceClientThriftImpl;
-import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.ExecutionPlanRuntime;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -32,7 +32,7 @@ public class HAManager {
     private final HazelcastInstance hazelcastInstance;
     private final String executionPlanName;
     private final int tenantId;
-    private final SiddhiManager siddhiManager;
+    private final ExecutionPlanRuntime executionPlanRuntime;
     private final int inputProcessors;
     private final CEPMembership currentCepMembershipInfo;
     private boolean activeLockAcquired;
@@ -52,11 +52,11 @@ public class HAManager {
     private static String passiveId;
 
 
-    public HAManager(HazelcastInstance hazelcastInstance, String executionPlanName, int tenantId, SiddhiManager siddhiManager, int inputProcessors, CEPMembership currentCepMembershipInfo) {
+    public HAManager(HazelcastInstance hazelcastInstance, String executionPlanName, int tenantId, ExecutionPlanRuntime executionPlanRuntime, int inputProcessors, CEPMembership currentCepMembershipInfo) {
         this.hazelcastInstance = hazelcastInstance;
         this.executionPlanName = executionPlanName;
         this.tenantId = tenantId;
-        this.siddhiManager = siddhiManager;
+        this.executionPlanRuntime = executionPlanRuntime;
         this.inputProcessors = inputProcessors;
         this.currentCepMembershipInfo = currentCepMembershipInfo;
         activeId = "Active:" + tenantId + ":" + executionPlanName;
@@ -78,6 +78,11 @@ public class HAManager {
                 if (!activeLockAcquired) {
                     tryChangeState();
                 }
+            }
+
+            @Override
+            public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
+
             }
         });
 
@@ -158,7 +163,7 @@ public class HAManager {
         }
 
         try {
-            siddhiManager.restore(snapshotData.getStates());
+            executionPlanRuntime.restore(snapshotData.getStates());
             byte[] eventData = snapshotData.getNextEventData();
             HashMap<String, Object[]> eventMap = (HashMap<String, Object[]>) ByteSerializer.BToO(eventData);
             for (Map.Entry<String, Object[]> entry : eventMap.entrySet()) {
@@ -263,7 +268,7 @@ public class HAManager {
         }
 
         snapshotData.setNextEventData(ByteSerializer.OToB(eventMap));
-        snapshotData.setStates(siddhiManager.snapshot());
+        snapshotData.setStates(executionPlanRuntime.snapshot());
 
         threadBarrier.open();
         return snapshotData;

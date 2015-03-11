@@ -1,19 +1,20 @@
-/**
- * Copyright (c) 2005 - 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- * <p/>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
-
 package org.wso2.carbon.event.processor.core.internal.util;
 
 import org.apache.commons.logging.Log;
@@ -81,9 +82,9 @@ public class EventProcessorUtil {
     }
 
     public static org.wso2.siddhi.query.api.definition.StreamDefinition convertToSiddhiStreamDefinition(
-            StreamDefinition streamDefinition, StreamConfiguration streamConfiguration) {
+            StreamDefinition streamDefinition, String siddhiStreamName) {
         org.wso2.siddhi.query.api.definition.StreamDefinition siddhiStreamDefinition = new org.wso2.siddhi.query.api.definition.StreamDefinition();
-        siddhiStreamDefinition.name(streamConfiguration.getSiddhiStreamName());
+        siddhiStreamDefinition.setId(siddhiStreamName);
         if (streamDefinition.getMetaData() != null) {
             for (org.wso2.carbon.databridge.commons.Attribute attribute : streamDefinition.getMetaData()) {
                 siddhiStreamDefinition.attribute(attribute.getName(), convertToSiddhiAttribute(attribute, EventProcessorConstants.META + EventProcessorConstants.ATTRIBUTE_SEPARATOR).getType());
@@ -198,5 +199,80 @@ public class EventProcessorUtil {
 
     public static String getStreamName(String streamId) {
         return streamId.split(EventProcessorConstants.STREAM_SEPARATOR)[0];
+    }
+
+    public static String getDefinitionString(StreamDefinition streamDefinition, String siddhiStreamName) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(EventProcessorConstants.DEFINE_STREAM);
+        builder.append(siddhiStreamName);
+        builder.append(EventProcessorConstants.OPENING_BRACKETS);
+        if (streamDefinition.getMetaData() != null) {
+            for (org.wso2.carbon.databridge.commons.Attribute attribute : streamDefinition.getMetaData()) {
+                builder.append(EventProcessorConstants.META + EventProcessorConstants.ATTRIBUTE_SEPARATOR + attribute
+                        .getName() + EventProcessorConstants.SPACE + attribute.getType().toString().toLowerCase() +
+                        EventProcessorConstants.COMMA);
+            }
+        }
+
+        if (streamDefinition.getCorrelationData() != null) {
+            for (org.wso2.carbon.databridge.commons.Attribute attribute : streamDefinition.getCorrelationData()) {
+                builder.append(EventProcessorConstants.CORRELATION + EventProcessorConstants.ATTRIBUTE_SEPARATOR + attribute
+                        .getName() + EventProcessorConstants.SPACE + attribute.getType().toString().toLowerCase() +
+                        EventProcessorConstants.COMMA);
+            }
+        }
+
+        if (streamDefinition.getPayloadData() != null) {
+            for (org.wso2.carbon.databridge.commons.Attribute attribute : streamDefinition.getPayloadData()) {
+                builder.append(attribute.getName() + EventProcessorConstants.SPACE + attribute.getType().toString()
+                        .toLowerCase() + EventProcessorConstants.COMMA);
+            }
+        }
+        builder.deleteCharAt(builder.length() - 2);         //remove last comma
+        builder.append(EventProcessorConstants.CLOSING_BRACKETS);
+        return builder.toString();
+    }
+
+    /**
+     * Construct Stream Definition query string for a given Siddhi Stream Definition
+     *
+     * @param siddhiStreamDefinition
+     * @return
+     */
+    public static String getDefinitionString(org.wso2.siddhi.query.api.definition.AbstractDefinition siddhiStreamDefinition) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(EventProcessorConstants.DEFINE_STREAM);
+        builder.append(siddhiStreamDefinition.getId());
+        builder.append(EventProcessorConstants.OPENING_BRACKETS);
+        for (Attribute attribute : siddhiStreamDefinition.getAttributeList()) {
+            builder.append(attribute.getName() + EventProcessorConstants.SPACE + attribute.getType().toString().toLowerCase() +
+                    EventProcessorConstants.COMMA);
+        }
+        builder.deleteCharAt(builder.length() - 2);         //remove last comma
+        builder.append(EventProcessorConstants.CLOSING_BRACKETS);
+        return builder.toString();
+    }
+
+    /**
+     * Constructs full query expression as String
+     *
+     * @param importDefinitions List of imported definitions
+     * @param exportDefinitions List of exported definitions
+     * @param queryExpressions  query expression given in the ExecutionPlanConfiguration
+     * @return
+     */
+    public static String constructQueryExpression(List<String> importDefinitions, List<String> exportDefinitions,
+                                                  String queryExpressions) {
+        StringBuilder builder = new StringBuilder();
+
+        for (String definition : importDefinitions) {
+            builder.append(definition);
+        }
+
+        for (String definition : exportDefinitions) {
+            builder.append(definition);
+        }
+        builder.append(queryExpressions);
+        return builder.toString();
     }
 }

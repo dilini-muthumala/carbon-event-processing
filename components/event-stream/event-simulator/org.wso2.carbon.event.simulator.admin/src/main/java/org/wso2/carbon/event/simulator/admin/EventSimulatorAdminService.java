@@ -1,21 +1,20 @@
 /*
- * Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
- */
-
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.simulator.admin;
 
 import org.apache.axis2.AxisFault;
@@ -23,32 +22,22 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Element;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.core.AbstractAdmin;
-
-import org.wso2.carbon.databridge.commons.StreamDefinition;
-
-import org.wso2.carbon.event.simulator.admin.internal.util.EventSimulatorAdminvalueHolder;
-import org.wso2.carbon.event.simulator.core.*;
 import org.wso2.carbon.databridge.commons.Attribute;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
+import org.wso2.carbon.event.simulator.admin.internal.util.EventSimulatorAdminvalueHolder;
+import org.wso2.carbon.event.simulator.admin.internal.util.EventSimulatorDataSourceConstants;
+import org.wso2.carbon.event.simulator.admin.internal.util.EventSimulatorDataSourceInfo;
+import org.wso2.carbon.event.simulator.core.*;
 
+import org.wso2.carbon.event.simulator.admin.internal.ExecutionInfo;
 
-//import org.wso2.carbon.eventsimulator.core.EventSimulator;
-
-import org.w3c.dom.Document;
-
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
 import java.util.Collection;
 import java.util.List;
+
+//import org.wso2.carbon.eventsimulator.core.EventSimulator;
 
 
 public class EventSimulatorAdminService extends AbstractAdmin {
@@ -256,6 +245,107 @@ public class EventSimulatorAdminService extends AbstractAdmin {
         ConfigurationContext configurationContext = getConfigContext();
         AxisConfiguration axisConfiguration = configurationContext.getAxisConfiguration();
         eventSimulator.deleteFile(fileName, axisConfiguration);
+    }
+
+    public void sendDBConfigFileNameToSimulate(String fileName) throws AxisFault {
+
+        EventSimulator eventSimulator = EventSimulatorAdminvalueHolder.getEventSimulator();
+        String jsonFormattedDBConfigAndColumnAndStreamAttributeDetails = eventSimulator.getEventStreamInfo(fileName);
+        JSONObject jsonConvertedInfo;
+        ExecutionInfo executionInfo;
+        try {
+            jsonConvertedInfo = new JSONObject(jsonFormattedDBConfigAndColumnAndStreamAttributeDetails);
+            executionInfo = EventSimulatorDataSourceInfo.getInitializedDatabaseExecutionInfo(jsonConvertedInfo);
+        } catch (JSONException e) {
+            throw new AxisFault("JSON exception when converting result of information retrieved by file name.");
+        }
+        eventSimulator.sendEventsViaDB(jsonConvertedInfo, executionInfo.getPreparedSelectStatement());
+    }
+
+    public void deleteDBConfigFile(String fileName) throws AxisFault {
+        EventSimulator eventSimulator = EventSimulatorAdminvalueHolder.getEventSimulator();
+        ConfigurationContext configurationContext = getConfigContext();
+        AxisConfiguration axisConfiguration = configurationContext.getAxisConfiguration();
+        eventSimulator.deleteDBConfigFile(fileName, axisConfiguration);
+    }
+
+    public String testSimulateRDBMSDataSourceConnection(String eventStreamDataSourceColumnNamesAndTypeInfo) throws AxisFault{
+        ExecutionInfo executionInfo;
+
+        try {
+            JSONObject jsonConvertedInfo = new JSONObject(eventStreamDataSourceColumnNamesAndTypeInfo);
+            try{
+                executionInfo = EventSimulatorDataSourceInfo.getInitializedDatabaseExecutionInfo(jsonConvertedInfo);
+                if(executionInfo!=null){
+                    String result = "{\""+ EventSimulatorConstant.EVENT_STREAM_ID+"\":\"" + jsonConvertedInfo.getString(EventSimulatorConstant.EVENT_STREAM_ID)
+                            + "\",\""+EventSimulatorConstant.EVENT_STREAM_NAME+"\":\"" + jsonConvertedInfo.getString(EventSimulatorConstant.EVENT_STREAM_NAME)
+                            + "\",\""+EventSimulatorConstant.DATA_SOURCE_NAME+"\":\"" + jsonConvertedInfo.getString(EventSimulatorConstant.DATA_SOURCE_NAME)
+                            + "\",\""+EventSimulatorConstant.TABLE_NAME+"\":\"" + jsonConvertedInfo.getString(EventSimulatorConstant.TABLE_NAME)
+                            + "\",\""+EventSimulatorConstant.CONFIGURATION_NAME+"\":\"" + jsonConvertedInfo.getString(EventSimulatorConstant.CONFIGURATION_NAME)
+                            + "\",\""+EventSimulatorConstant.DATABASE_COLUMNS_AND_STREAM_ATTRIBUTE_INFO+"\":" + jsonConvertedInfo.getJSONArray(EventSimulatorConstant.DATABASE_COLUMNS_AND_STREAM_ATTRIBUTE_INFO)
+                            + "}";
+
+                    return result;
+                }
+            }catch(AxisFault e){
+                throw e;
+            }
+        } catch (JSONException e) {
+            log.error(EventSimulatorDataSourceConstants.JSON_EXCEPTION, e);
+            throw new AxisFault(EventSimulatorDataSourceConstants.JSON_EXCEPTION, e);
+        }
+        return "failed";
+    }
+
+    public void saveDataSourceConfigDetails(String dataSourceConfigAndEventStreamInfo) throws AxisFault {
+
+        EventSimulator eventSimulator = EventSimulatorAdminvalueHolder.getEventSimulator();
+
+        ConfigurationContext configurationContext = getConfigContext();
+        AxisConfiguration axisConfiguration = configurationContext.getAxisConfiguration();
+
+        eventSimulator.createConfigurationXMLForDataSource(dataSourceConfigAndEventStreamInfo, axisConfiguration);
+
+    }
+
+    public DataSourceTableAndStreamInfoDto[] getAllDataSourceTableAndStreamInfo() {
+
+
+        EventSimulator eventSimulator = EventSimulatorAdminvalueHolder.getEventSimulator();
+
+        try {
+            List<DataSourceTableAndStreamInfo> DataSourceTableAndStreamInfoList = eventSimulator.getAllDataSourceInfo();
+
+            if (DataSourceTableAndStreamInfoList != null) {
+
+                DataSourceTableAndStreamInfoDto[] DataSourceTableAndStreamInfoDtoArray = new DataSourceTableAndStreamInfoDto[DataSourceTableAndStreamInfoList.size()];
+
+                int index = 0;
+                for (DataSourceTableAndStreamInfo dataSourceTableAndStreamInfo : DataSourceTableAndStreamInfoList) {
+
+                    DataSourceTableAndStreamInfoDtoArray[index] = new DataSourceTableAndStreamInfoDto();
+                    DataSourceTableAndStreamInfoDtoArray[index].setConfigurationName(dataSourceTableAndStreamInfo.getConfigurationName());
+                    DataSourceTableAndStreamInfoDtoArray[index].setDataSourceName(dataSourceTableAndStreamInfo.getDataSourceName());
+                    DataSourceTableAndStreamInfoDtoArray[index].setTableName(dataSourceTableAndStreamInfo.getTableName());
+                    DataSourceTableAndStreamInfoDtoArray[index].setEventStreamID(dataSourceTableAndStreamInfo.getEventStreamID());
+                    DataSourceTableAndStreamInfoDtoArray[index].setColumnNames(dataSourceTableAndStreamInfo.getDataSourceColumnsAndTypes()[0]);
+                    DataSourceTableAndStreamInfoDtoArray[index].setStreamAtrributeNames(dataSourceTableAndStreamInfo.getDataSourceColumnsAndTypes()[1]);
+                    DataSourceTableAndStreamInfoDtoArray[index].setFileName(dataSourceTableAndStreamInfo.getFileName());
+                    DataSourceTableAndStreamInfoDtoArray[index].setFilePath(dataSourceTableAndStreamInfo.getFilePath());
+
+                    index++;
+                }
+
+                return DataSourceTableAndStreamInfoDtoArray;
+            } else {
+                return new DataSourceTableAndStreamInfoDto[0];
+            }
+
+        } catch (Exception e) {
+            log.error(e);
+        }
+
+        return new DataSourceTableAndStreamInfoDto[0];
     }
 
 }

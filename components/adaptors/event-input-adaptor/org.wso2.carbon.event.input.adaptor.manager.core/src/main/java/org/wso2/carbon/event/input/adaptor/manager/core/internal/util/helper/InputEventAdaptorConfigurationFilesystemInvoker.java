@@ -1,20 +1,24 @@
-package org.wso2.carbon.event.input.adaptor.manager.core.internal.util.helper;
 /*
- * Copyright 2004,2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 
+package org.wso2.carbon.event.input.adaptor.manager.core.internal.util.helper;
+
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.deployment.Deployer;
 import org.apache.axis2.deployment.DeploymentEngine;
@@ -23,17 +27,18 @@ import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.event.input.adaptor.core.config.InternalInputEventAdaptorConfiguration;
 import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorDeployer;
 import org.wso2.carbon.event.input.adaptor.manager.core.exception.InputEventAdaptorManagerConfigurationException;
+import org.wso2.carbon.event.input.adaptor.manager.core.internal.ds.InputEventAdaptorManagerValueHolder;
 import org.wso2.carbon.event.input.adaptor.manager.core.internal.util.InputEventAdaptorManagerConstants;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import javax.xml.namespace.QName;
+import java.io.*;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class used to do the file system related tasks
@@ -45,16 +50,47 @@ public final class InputEventAdaptorConfigurationFilesystemInvoker {
     private InputEventAdaptorConfigurationFilesystemInvoker() {
     }
 
-    public static void save(OMElement eventAdaptorElement,
-                            String eventAdaptorName, String fileName,
-                            AxisConfiguration axisConfiguration)
+    public static void encryptAndSave(OMElement eventAdaptorElement,
+                                      String eventAdaptorName, String fileName,
+                                      AxisConfiguration axisConfiguration)
             throws InputEventAdaptorManagerConfigurationException {
+
+        String adaptorType = eventAdaptorElement.getAttributeValue(new QName(InputEventAdaptorManagerConstants.IEA_ATTR_TYPE));
+        List<String> encryptedProperties = InputEventAdaptorManagerValueHolder.getCarbonEventAdaptorManagerService().getEncryptedProperties(adaptorType);
+
+        Iterator propertyIter = eventAdaptorElement.getChildrenWithName(
+                new QName(InputEventAdaptorManagerConstants.IEA_CONF_NS, InputEventAdaptorManagerConstants.IEA_ELE_PROPERTY));
+        InternalInputEventAdaptorConfiguration outputEventAdaptorPropertyConfiguration = new InternalInputEventAdaptorConfiguration();
+        if (propertyIter.hasNext()) {
+            while (propertyIter.hasNext()) {
+                OMElement propertyOMElement = (OMElement) propertyIter.next();
+                String name = propertyOMElement.getAttributeValue(
+                        new QName(InputEventAdaptorManagerConstants.IEA_ATTR_NAME));
+
+                if (encryptedProperties.contains(name.trim())) {
+                    OMAttribute encryptedAttribute = propertyOMElement.getAttribute(new QName(InputEventAdaptorManagerConstants.IEA_ATTR_ENCRYPTED));
+
+                    if (encryptedAttribute == null || (!"true".equals(encryptedAttribute.getAttributeValue()))) {
+                        String value = propertyOMElement.getText();
+
+                        try {
+                            value = new String(CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(value.getBytes()));
+                            propertyOMElement.setText(value);
+                            propertyOMElement.addAttribute(InputEventAdaptorManagerConstants.IEA_ATTR_ENCRYPTED, "true", null);
+                        } catch (Exception e) {
+                            log.error("Unable to decrypt the encrypted field: " + name + " for adaptor type: " + adaptorType);
+                            propertyOMElement.setText("");
+                        }
+                    }
+                }
+            }
+        }
 
         InputEventAdaptorConfigurationFilesystemInvoker.save(eventAdaptorElement.toString(), eventAdaptorName, fileName, axisConfiguration);
     }
 
-    public static void save(String eventAdaptorConfiguration, String eventAdaptorName,
-                            String fileName, AxisConfiguration axisConfiguration)
+    private static void save(String eventAdaptorConfiguration, String eventAdaptorName,
+                             String fileName, AxisConfiguration axisConfiguration)
             throws InputEventAdaptorManagerConfigurationException {
         InputEventAdaptorDeployer deployer = (InputEventAdaptorDeployer) getDeployer(axisConfiguration, InputEventAdaptorManagerConstants.IEA_ELE_DIRECTORY);
         String filePath = getfilePathFromFilename(fileName, axisConfiguration);
@@ -108,10 +144,9 @@ public final class InputEventAdaptorConfigurationFilesystemInvoker {
         return deploymentEngine.getDeployer(endpointDirPath, "xml");
     }
 
-    public static void reload(String fileName, AxisConfiguration axisConfiguration)
+    public static void reload(String filePath, AxisConfiguration axisConfiguration)
             throws InputEventAdaptorManagerConfigurationException {
         InputEventAdaptorDeployer deployer = (InputEventAdaptorDeployer) getDeployer(axisConfiguration, InputEventAdaptorManagerConstants.IEA_ELE_DIRECTORY);
-        String filePath = getfilePathFromFilename(fileName, axisConfiguration);
 
         DeploymentFileData deploymentFileData = new DeploymentFileData(new File(filePath));
         try {
@@ -120,7 +155,6 @@ public final class InputEventAdaptorConfigurationFilesystemInvoker {
         } catch (DeploymentException e) {
             throw new InputEventAdaptorManagerConfigurationException(e);
         }
-
     }
 
     public static String readEventAdaptorConfigurationFile(String fileName,

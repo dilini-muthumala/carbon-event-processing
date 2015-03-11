@@ -1,19 +1,20 @@
 /*
- * Copyright 2004,2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.output.adaptor.core.internal.ds;
 
 import org.apache.commons.logging.Log;
@@ -31,7 +32,6 @@ import java.util.List;
  * interface="org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorFactory" cardinality="0..n"
  * policy="dynamic" bind="setEventAdaptorType" unbind="unSetEventAdaptorType"
  */
-
 public class OutputEventAdaptorServiceTrackerDS {
 
     private static final Log log = LogFactory.getLog(OutputEventAdaptorServiceTrackerDS.class);
@@ -40,7 +40,7 @@ public class OutputEventAdaptorServiceTrackerDS {
     /**
      * initialize the Event Adaptor Manager core service here.
      *
-     * @param context
+     * @param context the component context that will be passed in from the OSGi environment at activation
      */
     protected void activate(ComponentContext context) {
         try {
@@ -61,7 +61,12 @@ public class OutputEventAdaptorServiceTrackerDS {
                 outputEventAdaptorFactories.add(outputEventAdaptorFactory);
             }
         } catch (Throwable t) {
-            log.error(t);
+            String outputEventAdaptorFactoryClassName = "Unknown";
+            if (outputEventAdaptorFactory != null) {
+                outputEventAdaptorFactoryClassName = outputEventAdaptorFactory.getClass().getName();
+            }
+            log.error("Unexpected error at initializing output event adaptor factory "
+                    + outputEventAdaptorFactoryClassName + ": " + t.getMessage(), t);
         }
     }
 

@@ -1,19 +1,19 @@
 /*
- * Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 function clearTextIn(obj) {
@@ -35,8 +35,7 @@ function fillTextIn(obj) {
 }
 
 
-function loadEventAdaptorMessageProperties(messageProperty, eventFormatterInputTable, propertyLoop,
-                                           propertyValue, requiredValue) {
+function loadEventAdaptorMessageProperties(messageProperty, eventFormatterInputTable, propertyLoop, propertyValue, requiredValue) {
 
     var property = messageProperty.localDisplayName.trim();
     var tableRow = eventFormatterInputTable.insertRow(eventFormatterInputTable.rows.length);
@@ -113,17 +112,17 @@ function showEventStreamDefinition() {
     var selected_text = document.getElementById("streamNameFilter").options[selectedIndex].text;
 
     jQuery.ajax({
-                    type:"POST",
-                    url:"../eventstream/get_streamdefinition_ajaxprocessor.jsp?streamName=" + selected_text + "",
-                    data:{},
-                    contentType:"application/json; charset=utf-8",
-                    dataType:"text",
-                    async:false,
-                    success:function (streamDefinition) {
+        type: "POST",
+        url: "../eventstream/get_streamdefinition_ajaxprocessor.jsp?streamName=" + selected_text + "",
+        data: {},
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        async: false,
+        success: function (streamDefinition) {
 
-                        jQuery('#streamDefinitionText').val(streamDefinition.trim());
-                    }
-                });
+            jQuery('#streamDefinitionText').val(streamDefinition.trim());
+        }
+    });
 }
 
 function loadEventAdaptorRelatedProperties(toPropertyHeader) {
@@ -133,30 +132,30 @@ function loadEventAdaptorRelatedProperties(toPropertyHeader) {
 
 
     jQuery.ajax({
-                    type:"POST",
-                    url:"../eventstream/get_mappings_ajaxprocessor.jsp?eventAdaptorName=" + selected_text + "",
-                    data:{},
-                    contentType:"application/json; charset=utf-8",
-                    dataType:"text",
-                    async:false,
-                    success:function (mappingTypes) {
+        type: "POST",
+        url: "../eventstream/get_mappings_ajaxprocessor.jsp?eventAdaptorName=" + selected_text + "",
+        data: {},
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        async: false,
+        success: function (mappingTypes) {
 
-                        if (mappingTypes != null) {
-                            mappingTypes = mappingTypes.trim();
-                            // properties are taken as | separated property names
-                            var mappings = mappingTypes.split("|=");
-                            var propertyCount = mappings.length;
-                            jQuery('#mappingTypeFilter').empty();
-                            // for each property, add a text and input field in a row
-                            for (i = 1; i < propertyCount; i++) {
-                                if (mappings[i].trim() != "") {
-                                    jQuery('#mappingTypeFilter').append('<option>' + mappings[i].trim() + '</option>');
-                                }
-                            }
-
-                        }
+            if (mappingTypes != null) {
+                mappingTypes = mappingTypes.trim();
+                // properties are taken as | separated property names
+                var mappings = mappingTypes.split("|=");
+                var propertyCount = mappings.length;
+                jQuery('#mappingTypeFilter').empty();
+                // for each property, add a text and input field in a row
+                for (i = 1; i < propertyCount; i++) {
+                    if (mappings[i].trim() != "") {
+                        jQuery('#mappingTypeFilter').append('<option>' + mappings[i].trim() + '</option>');
                     }
-                });
+                }
+
+            }
+        }
+    });
 
 
     var eventFormatterInputTable = document.getElementById("eventFormatterInputTable");
@@ -166,32 +165,32 @@ function loadEventAdaptorRelatedProperties(toPropertyHeader) {
     }
 
     jQuery.ajax({
-                    type:"POST",
-                    url:"../eventstream/get_Message_Properties_ajaxprocessor.jsp?eventAdaptorName=" + selected_text + "",
-                    data:{},
-                    contentType:"application/json; charset=utf-8",
-                    dataType:"text",
-                    async:false,
-                    success:function (propertiesString) {
+        type: "POST",
+        url: "../eventstream/get_Message_Properties_ajaxprocessor.jsp?eventAdaptorName=" + selected_text + "",
+        data: {},
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        async: false,
+        success: function (propertiesString) {
 
-                        if (propertiesString != null) {
-                            var jsonObject = JSON.parse(propertiesString);
+            if (propertiesString != null) {
+                var jsonObject = JSON.parse(propertiesString);
 
-                            if (jsonObject != undefined) {
-                                var propertyLoop = 0;
-                                var inputProperty = "property_";
-                                var inputRequiredProperty = "property_Required_";
-                                var tableRow = eventFormatterInputTable.insertRow(eventFormatterInputTable.rows.length);
-                                tableRow.innerHTML = '<td colspan="2" ><b>' + toPropertyHeader + '</b></td> ';
-                                jQuery.each(jsonObject, function (index, messageProperty) {
-                                    loadEventAdaptorMessageProperties(messageProperty, eventFormatterInputTable, propertyLoop, inputProperty, inputRequiredProperty);
-                                    propertyLoop = propertyLoop + 1;
-                                });
-                            }
+                if (jsonObject != undefined) {
+                    var propertyLoop = 0;
+                    var inputProperty = "property_";
+                    var inputRequiredProperty = "property_Required_";
+                    var tableRow = eventFormatterInputTable.insertRow(eventFormatterInputTable.rows.length);
+                    tableRow.innerHTML = '<td colspan="2" ><b>' + toPropertyHeader + '</b></td> ';
+                    jQuery.each(jsonObject, function (index, messageProperty) {
+                        loadEventAdaptorMessageProperties(messageProperty, eventFormatterInputTable, propertyLoop, inputProperty, inputRequiredProperty);
+                        propertyLoop = propertyLoop + 1;
+                    });
+                }
 
-                        }
-                    }
-                });
+            }
+        }
+    });
 
     showMappingContext();
 }

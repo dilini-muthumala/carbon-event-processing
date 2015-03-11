@@ -1,21 +1,20 @@
 /*
- * Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
- */
-
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.builder.core.internal;
 
 import org.apache.axiom.om.OMElement;
@@ -23,13 +22,15 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.event.builder.core.EventBuilderService;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
+import org.wso2.carbon.event.builder.core.config.EventBuilderConfigurationFile;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderStreamValidationException;
-import org.wso2.carbon.event.builder.core.internal.config.EventBuilderConfigurationFile;
 import org.wso2.carbon.event.builder.core.internal.ds.EventBuilderServiceValueHolder;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConfigBuilder;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConstants;
@@ -43,6 +44,7 @@ import org.wso2.carbon.event.input.adaptor.core.config.InputEventAdaptorConfigur
 import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorManagerService;
 import org.wso2.carbon.event.input.adaptor.manager.core.exception.InputEventAdaptorManagerConfigurationException;
 import org.wso2.carbon.event.stream.manager.core.exception.EventStreamConfigurationException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -52,8 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CarbonEventBuilderService
-        implements EventBuilderService {
+public class CarbonEventBuilderService implements EventBuilderService {
 
     private static final Log log = LogFactory.getLog(CarbonEventBuilderService.class);
     private Map<Integer, Map<String, List<EventBuilder>>> tenantSpecificEventBuilderMap;
@@ -157,7 +158,7 @@ public class CarbonEventBuilderService
     }
 
     public void addEventBuilderConfigurationFile(String eventBuilderName,
-                                                 String fileName,
+                                                 File file,
                                                  EventBuilderConfigurationFile.DeploymentStatus status,
                                                  String deploymentStatusMessage, String dependency,
                                                  String streamNameWithVersion,
@@ -170,7 +171,7 @@ public class CarbonEventBuilderService
             tenantSpecificEventBuilderConfigFileMap.put(tenantId, eventBuilderConfigurationFiles);
         }
         EventBuilderConfigurationFile eventBuilderConfigurationFile = createEventBuilderConfigurationFile(
-                eventBuilderName, fileName, status, axisConfiguration, deploymentStatusMessage, dependency,
+                eventBuilderName, file, status, axisConfiguration, deploymentStatusMessage, dependency,
                 streamNameWithVersion, ebConfigElement);
         eventBuilderConfigurationFiles.add(eventBuilderConfigurationFile);
     }
@@ -178,11 +179,13 @@ public class CarbonEventBuilderService
     public void removeEventBuilderConfigurationFile(String fileName, int tenantId)
             throws EventBuilderConfigurationException {
 
-        List<EventBuilderConfigurationFile> eventBuilderConfigurationFileList = tenantSpecificEventBuilderConfigFileMap.get(tenantId);
+        List<EventBuilderConfigurationFile> eventBuilderConfigurationFileList =
+                tenantSpecificEventBuilderConfigFileMap.get(tenantId);
         if (eventBuilderConfigurationFileList != null) {
             for (EventBuilderConfigurationFile eventBuilderConfigurationFile : eventBuilderConfigurationFileList) {
                 if ((eventBuilderConfigurationFile.getFileName().equals(fileName))) {
-                    if (eventBuilderConfigurationFile.getDeploymentStatus().equals(EventBuilderConfigurationFile.DeploymentStatus.DEPLOYED)) {
+                    if (eventBuilderConfigurationFile.getDeploymentStatus().
+                            equals(EventBuilderConfigurationFile.DeploymentStatus.DEPLOYED)) {
                         String eventBuilderName = eventBuilderConfigurationFile.getEventBuilderName();
                         removeEventBuilder(eventBuilderName, tenantId);
                     }
@@ -322,7 +325,18 @@ public class CarbonEventBuilderService
         ConfigurationValidator.validateEventBuilderConfiguration(omElement);
         String mappingType = EventBuilderConfigHelper.getInputMappingType(omElement);
         if (mappingType != null) {
-            EventBuilderConfigurationFileSystemInvoker.save(omElement.toString(), new File(filePath).getName());
+            AxisConfiguration axisConfiguration;
+            if (CarbonContext.getThreadLocalCarbonContext().getTenantId() == MultitenantConstants.SUPER_TENANT_ID) {
+                axisConfiguration = EventBuilderServiceValueHolder.getConfigurationContextService().
+                        getServerConfigContext().getAxisConfiguration();
+            } else {
+                axisConfiguration = TenantAxisUtils.getTenantAxisConfiguration(CarbonContext.
+                                getThreadLocalCarbonContext().getTenantDomain(),
+                        EventBuilderServiceValueHolder.getConfigurationContextService().
+                                getServerConfigContext());
+            }
+            EventBuilderConfigurationFileSystemInvoker.saveAndDeploy(omElement.toString(),
+                    new File(filePath).getName(), axisConfiguration);
         } else {
             throw new EventBuilderConfigurationException("Mapping type of the Event Builder " + eventBuilderConfiguration.getEventBuilderName() + " cannot be null");
         }
@@ -390,7 +404,7 @@ public class CarbonEventBuilderService
         }
     }
 
-    public void saveDefaultEventBuilder(String streamId,int tenantId) throws EventBuilderConfigurationException {
+    public void saveDefaultEventBuilder(String streamId, int tenantId) throws EventBuilderConfigurationException {
         try {
             InputEventAdaptorManagerService inputEventAdaptorManagerService = EventBuilderServiceValueHolder.getInputEventAdaptorManagerService();
             String defaultWso2EventAdaptorName = inputEventAdaptorManagerService.getDefaultWso2EventAdaptor();
@@ -403,8 +417,11 @@ public class CarbonEventBuilderService
 
                 if (!EventBuilderConfigurationFileSystemInvoker.isFileExists(filename)) {
                     for (EventBuilderConfiguration eventBuilderConfiguration : getAllActiveEventBuilderConfigurations(tenantId)) {
-                        if (eventBuilderConfiguration.getInputStreamConfiguration().getInputEventAdaptorName().equals(defaultWso2EventAdaptorName) && (eventBuilderConfiguration.getToStreamName() + ":" + eventBuilderConfiguration.getToStreamVersion()).equals(streamId)) {
-                            log.info("Skipping defining default event builder "+defaultEventBuilderConfiguration.getEventBuilderName()+" as "+eventBuilderConfiguration.getEventBuilderName()+" already exist");
+
+                        //TODO - We have to decide about default builder handeling -- If there is a builder which send events to the specific stream then there is no default builder created
+                        //eventBuilderConfiguration.getInputStreamConfiguration().getInputEventAdaptorName().equals(defaultWso2EventAdaptorName) &&
+                        if ((eventBuilderConfiguration.getToStreamName() + ":" + eventBuilderConfiguration.getToStreamVersion()).equals(streamId)) {
+                            log.info("Skipping defining default event builder " + defaultEventBuilderConfiguration.getEventBuilderName() + " as " + eventBuilderConfiguration.getEventBuilderName() + " already exist");
                             return;
                         }
                     }
@@ -491,7 +508,7 @@ public class CarbonEventBuilderService
             }
             String mappingType = EventBuilderConfigHelper.getInputMappingType(omElement);
             if (mappingType != null) {
-                EventBuilderConfiguration eventBuilderConfigurationObject = EventBuilderConfigBuilder.getEventBuilderConfiguration(omElement, mappingType, tenantId);
+                EventBuilderConfiguration eventBuilderConfigurationObject = EventBuilderConfigBuilder.getEventBuilderConfiguration(omElement, mappingType, true, tenantId);
                 if (!(eventBuilderConfigurationObject.getEventBuilderName().equals(originalEventBuilderName))) {
                     if (!isEventBuilderAlreadyExists(tenantId, eventBuilderConfigurationObject.getEventBuilderName())) {
                         EventBuilderConfigurationFileSystemInvoker.delete(filename, axisConfiguration);
@@ -514,12 +531,13 @@ public class CarbonEventBuilderService
     }
 
     private EventBuilderConfigurationFile createEventBuilderConfigurationFile(
-            String eventBuilderName, String filePath,
+            String eventBuilderName, File file,
             EventBuilderConfigurationFile.DeploymentStatus status,
             AxisConfiguration axisConfiguration,
             String deploymentStatusMessage, String dependency, String streamNameWithVersion,
             OMElement ebConfigElement) {
-        EventBuilderConfigurationFile eventBuilderConfigurationFile = new EventBuilderConfigurationFile(filePath);
+        EventBuilderConfigurationFile eventBuilderConfigurationFile = new EventBuilderConfigurationFile(file.getName());
+        eventBuilderConfigurationFile.setFilePath(file.getAbsolutePath());
         eventBuilderConfigurationFile.setEventBuilderName(eventBuilderName);
         eventBuilderConfigurationFile.setDeploymentStatus(status);
         eventBuilderConfigurationFile.setDeploymentStatusMessage(deploymentStatusMessage);
@@ -549,9 +567,9 @@ public class CarbonEventBuilderService
         }
         for (EventBuilderConfigurationFile builderConfigurationFile : fileList) {
             try {
-                EventBuilderConfigurationFileSystemInvoker.reload(builderConfigurationFile.getFileName(), builderConfigurationFile.getAxisConfiguration());
+                EventBuilderConfigurationFileSystemInvoker.reload(builderConfigurationFile.getFilePath(), builderConfigurationFile.getAxisConfiguration());
             } catch (Exception e) {
-                log.error("Exception occurred while trying to deploy the Event Builder configuration file : " + new File(builderConfigurationFile.getFileName()).getName(), e);
+                log.error("Exception occurred while trying to deploy the Event Builder configuration file : " + builderConfigurationFile.getFileName(), e);
             }
         }
     }
@@ -574,9 +592,9 @@ public class CarbonEventBuilderService
         }
         for (EventBuilderConfigurationFile builderConfigurationFile : fileList) {
             try {
-                EventBuilderConfigurationFileSystemInvoker.reload(builderConfigurationFile.getFileName(), builderConfigurationFile.getAxisConfiguration());
+                EventBuilderConfigurationFileSystemInvoker.reload(builderConfigurationFile.getFilePath(), builderConfigurationFile.getAxisConfiguration());
             } catch (Exception e) {
-                log.error("Exception occurred while trying to deploy the Event Builder configuration file : " + new File(builderConfigurationFile.getFileName()).getName(), e);
+                log.error("Exception occurred while trying to deploy the Event Builder configuration file : " + builderConfigurationFile.getFileName(), e);
             }
         }
     }
@@ -609,7 +627,7 @@ public class CarbonEventBuilderService
         }
 
         for (EventBuilderConfigurationFile builderConfigurationFile : fileList) {
-            EventBuilderConfigurationFileSystemInvoker.reload(builderConfigurationFile.getFileName(), builderConfigurationFile.getAxisConfiguration());
+            EventBuilderConfigurationFileSystemInvoker.reload(builderConfigurationFile.getFilePath(), builderConfigurationFile.getAxisConfiguration());
             log.info("Event builder : " + builderConfigurationFile.getEventBuilderName() + " in inactive state because dependency could not be found : " + inputEventAdaptorConfiguration.getName());
         }
     }
@@ -638,7 +656,7 @@ public class CarbonEventBuilderService
             }
         }
         for (EventBuilderConfigurationFile builderConfigurationFile : fileList) {
-            EventBuilderConfigurationFileSystemInvoker.reload(builderConfigurationFile.getFileName(), builderConfigurationFile.getAxisConfiguration());
+            EventBuilderConfigurationFileSystemInvoker.reload(builderConfigurationFile.getFilePath(), builderConfigurationFile.getAxisConfiguration());
             log.info("Event builder : " + builderConfigurationFile.getEventBuilderName() + " in inactive state because event stream dependency  could not be found : " + streamNameWithVersion);
         }
     }
@@ -651,7 +669,7 @@ public class CarbonEventBuilderService
                 for (EventBuilderConfigurationFile eventBuilderConfigurationFile : eventBuilderConfigurationFiles) {
                     if ((eventBuilderConfigurationFile.getEventBuilderName().equals(eventBuilderName))
                             && eventBuilderConfigurationFile.getDeploymentStatus().equals(EventBuilderConfigurationFile.DeploymentStatus.DEPLOYED)) {
-                        return eventBuilderConfigurationFile.getFileName();
+                        return new File(eventBuilderConfigurationFile.getFileName()).getName();
                     }
                 }
             }
@@ -708,5 +726,20 @@ public class CarbonEventBuilderService
         }
 
     }
+
+    public boolean isEventBuilderFileAlreadyExist(String eventBuilderFileName, int tenantId) {
+        if (tenantSpecificEventBuilderConfigFileMap.size() > 0) {
+            List<EventBuilderConfigurationFile> eventBuilderConfigurationFiles = tenantSpecificEventBuilderConfigFileMap.get(tenantId);
+            if (eventBuilderConfigurationFiles != null) {
+                for (EventBuilderConfigurationFile eventBuilderConfigurationFile : eventBuilderConfigurationFiles) {
+                    if ((eventBuilderConfigurationFile.getFileName().equals(eventBuilderFileName))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
 }

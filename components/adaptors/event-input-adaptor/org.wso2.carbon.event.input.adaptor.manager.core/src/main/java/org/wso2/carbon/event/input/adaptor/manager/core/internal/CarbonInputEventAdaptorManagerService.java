@@ -1,19 +1,20 @@
 /*
- * Copyright 2004,2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.input.adaptor.manager.core.internal;
 
 import org.apache.axiom.om.OMElement;
@@ -22,6 +23,8 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.event.input.adaptor.core.InputEventAdaptorDto;
+import org.wso2.carbon.event.input.adaptor.core.Property;
 import org.wso2.carbon.event.input.adaptor.core.config.InputEventAdaptorConfiguration;
 import org.wso2.carbon.event.input.adaptor.core.config.InternalInputEventAdaptorConfiguration;
 import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorFile;
@@ -29,17 +32,14 @@ import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorInfo;
 import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorManagerService;
 import org.wso2.carbon.event.input.adaptor.manager.core.InputEventAdaptorNotificationListener;
 import org.wso2.carbon.event.input.adaptor.manager.core.exception.InputEventAdaptorManagerConfigurationException;
+import org.wso2.carbon.event.input.adaptor.manager.core.internal.ds.InputEventAdaptorHolder;
 import org.wso2.carbon.event.input.adaptor.manager.core.internal.util.InputEventAdaptorManagerConstants;
 import org.wso2.carbon.event.input.adaptor.manager.core.internal.util.helper.InputEventAdaptorConfigurationFilesystemInvoker;
 import org.wso2.carbon.event.input.adaptor.manager.core.internal.util.helper.InputEventAdaptorConfigurationHelper;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -73,21 +73,28 @@ public class CarbonInputEventAdaptorManagerService
         OMElement omElement = InputEventAdaptorConfigurationHelper.eventAdaptorConfigurationToOM(eventAdaptorConfiguration);
 
         if (InputEventAdaptorConfigurationHelper.validateEventAdaptorConfiguration(InputEventAdaptorConfigurationHelper.fromOM(omElement))) {
-            File directory = new File(axisConfiguration.getRepository().getPath());
+            String repoPath = axisConfiguration.getRepository().getPath();
+            File directory = new File(repoPath);
             if (!directory.exists()) {
-                if (directory.mkdir()) {
-                    throw new InputEventAdaptorManagerConfigurationException("Cannot create directory to add tenant specific Input Event Adaptor :" + eventAdaptorName);
+                synchronized (repoPath.intern()) {
+                    if (!directory.mkdir()) {
+                        throw new InputEventAdaptorManagerConfigurationException("Cannot create directory to add tenant specific Input Event Adaptor :" + eventAdaptorName);
+                    }
                 }
             }
-            directory = new File(directory.getAbsolutePath() + File.separator + InputEventAdaptorManagerConstants.IEA_ELE_DIRECTORY);
+
+            String inputAdaptorsConfigPath = directory.getAbsolutePath() + File.separator + InputEventAdaptorManagerConstants.IEA_ELE_DIRECTORY;
+            directory = new File(inputAdaptorsConfigPath);
             if (!directory.exists()) {
-                if (!directory.mkdir()) {
-                    throw new InputEventAdaptorManagerConfigurationException("Cannot create directory " + InputEventAdaptorManagerConstants.IEA_ELE_DIRECTORY + " to add tenant specific Input Event Adaptor :" + eventAdaptorName);
+                synchronized (inputAdaptorsConfigPath.intern()) {
+                    if (!directory.mkdir()) {
+                        throw new InputEventAdaptorManagerConfigurationException("Cannot create directory " + InputEventAdaptorManagerConstants.IEA_ELE_DIRECTORY + " to add tenant specific Input Event Adaptor :" + eventAdaptorName);
+                    }
                 }
             }
 
             validateToRemoveInactiveEventAdaptorConfiguration(eventAdaptorName, axisConfiguration);
-            InputEventAdaptorConfigurationFilesystemInvoker.save(omElement, eventAdaptorName, eventAdaptorName + ".xml", axisConfiguration);
+            InputEventAdaptorConfigurationFilesystemInvoker.encryptAndSave(omElement, eventAdaptorName, eventAdaptorName + ".xml", axisConfiguration);
 
         } else {
             log.error("There is no Input Event Adaptor type called " + eventAdaptorConfiguration.getType() + " is available");
@@ -157,11 +164,11 @@ public class CarbonInputEventAdaptorManagerService
             if (checkAdaptorValidity(tenantId, eventAdaptorConfigurationObject.getName())) {
                 if (InputEventAdaptorConfigurationHelper.validateEventAdaptorConfiguration(eventAdaptorConfigurationObject)) {
                     undeployInactiveInputEventAdaptorConfiguration(filename, axisConfiguration);
-                    InputEventAdaptorConfigurationFilesystemInvoker.save(omElement, eventAdaptorConfigurationObject.getName(), filename, axisConfiguration);
+                    InputEventAdaptorConfigurationFilesystemInvoker.encryptAndSave(omElement, eventAdaptorConfigurationObject.getName(), filename, axisConfiguration);
                 } else {
                     log.error("There is no event adaptor type called " + eventAdaptorConfigurationObject.getType() + " is available");
                     throw new InputEventAdaptorManagerConfigurationException("There is no Input Event Adaptor type called "
-                                                                             + eventAdaptorConfigurationObject.getType() + " is available ");
+                            + eventAdaptorConfigurationObject.getType() + " is available ");
                 }
             } else {
                 throw new InputEventAdaptorManagerConfigurationException("There is a Input Event Adaptor with the same name");
@@ -350,7 +357,6 @@ public class CarbonInputEventAdaptorManagerService
      * to add to the tenant specific event adaptor configuration map (only the correctly deployed event adaptors)
      *
      * @throws org.wso2.carbon.event.input.adaptor.manager.core.exception.InputEventAdaptorManagerConfigurationException
-     *
      */
     public void addInputEventAdaptorConfiguration(
             int tenantId, InputEventAdaptorConfiguration eventAdaptorConfiguration)
@@ -394,7 +400,7 @@ public class CarbonInputEventAdaptorManagerService
         List<InputEventAdaptorFile> inputEventAdaptorFileList = eventAdaptorFileMap.get(tenantId);
         if (inputEventAdaptorFileList != null) {
             for (InputEventAdaptorFile inputEventAdaptorFile : inputEventAdaptorFileList) {
-                if ((inputEventAdaptorFile.getFileName().equals(fileName))) {
+                if (inputEventAdaptorFile.getFileName().equals(fileName)) {
                     if (inputEventAdaptorFile.getStatus().equals(InputEventAdaptorFile.Status.DEPLOYED)) {
                         String eventAdaptorName = inputEventAdaptorFile.getEventAdaptorName();
                         removeFromTenantSpecificEventAdaptorInfoMap(tenantId, eventAdaptorName);
@@ -437,7 +443,7 @@ public class CarbonInputEventAdaptorManagerService
 
         for (InputEventAdaptorFile inputEventAdaptorFile : inputEventAdaptorFiles) {
             try {
-                InputEventAdaptorConfigurationFilesystemInvoker.reload(inputEventAdaptorFile.getFileName(), inputEventAdaptorFile.getAxisConfiguration());
+                InputEventAdaptorConfigurationFilesystemInvoker.reload(inputEventAdaptorFile.getFilePath(), inputEventAdaptorFile.getAxisConfiguration());
             } catch (Exception e) {
                 log.error("Exception occurred while trying to deploy the Input Event Adaptor configuration file : " + new File(inputEventAdaptorFile.getFileName()).getName());
             }
@@ -476,7 +482,7 @@ public class CarbonInputEventAdaptorManagerService
         undeployActiveInputEventAdaptorConfiguration(eventAdaptorName, axisConfiguration);
         OMElement omElement = InputEventAdaptorConfigurationHelper.eventAdaptorConfigurationToOM(inputEventAdaptorConfiguration);
         InputEventAdaptorConfigurationFilesystemInvoker.delete(fileName, axisConfiguration);
-        InputEventAdaptorConfigurationFilesystemInvoker.save(omElement, eventAdaptorName, fileName, axisConfiguration);
+        InputEventAdaptorConfigurationFilesystemInvoker.encryptAndSave(omElement, eventAdaptorName, fileName, axisConfiguration);
     }
 
     /**
@@ -484,7 +490,6 @@ public class CarbonInputEventAdaptorManagerService
      * for event adaptor configuration
      *
      * @throws org.wso2.carbon.event.input.adaptor.manager.core.exception.InputEventAdaptorManagerConfigurationException
-     *
      */
     private void addToTenantSpecificEventAdaptorInfoMap(int tenantId,
                                                         InputEventAdaptorConfiguration eventAdaptorConfiguration)
@@ -545,7 +550,6 @@ public class CarbonInputEventAdaptorManagerService
      * this stores the event adaptor configuration to the file system after validating the event adaptor when doing editing
      *
      * @throws org.wso2.carbon.event.input.adaptor.manager.core.exception.InputEventAdaptorManagerConfigurationException
-     *
      */
     private void validateToEditEventAdaptorConfiguration(int tenantId,
                                                          String eventAdaptorName,
@@ -559,7 +563,7 @@ public class CarbonInputEventAdaptorManagerService
                 fileName = eventAdaptorName + InputEventAdaptorManagerConstants.IEA_CONFIG_FILE_EXTENSION_WITH_DOT;
             }
             InputEventAdaptorConfigurationFilesystemInvoker.delete(fileName, axisConfiguration);
-            InputEventAdaptorConfigurationFilesystemInvoker.save(omElement, eventAdaptorName, fileName, axisConfiguration);
+            InputEventAdaptorConfigurationFilesystemInvoker.encryptAndSave(omElement, eventAdaptorName, fileName, axisConfiguration);
         } else {
             log.error("There is no Input Event Adaptor type called " + eventAdaptorConfiguration.getType() + " is available ");
             throw new InputEventAdaptorManagerConfigurationException("There is no Input Event Adaptor type called " + eventAdaptorConfiguration.getType() + " is available ");
@@ -584,6 +588,39 @@ public class CarbonInputEventAdaptorManagerService
             }
         }
 
+    }
+
+
+    public boolean isInputEventAdaptorFileAlreadyExist(int tenantId, String eventAdaptorFileName) {
+
+        if (eventAdaptorFileMap.size() > 0) {
+            List<InputEventAdaptorFile> inputEventAdaptorFileList = eventAdaptorFileMap.get(tenantId);
+            if (inputEventAdaptorFileList != null) {
+                for (InputEventAdaptorFile inputEventAdaptorFile : inputEventAdaptorFileList) {
+                    if ((inputEventAdaptorFile.getFileName().equals(eventAdaptorFileName))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public List<String> getEncryptedProperties(String eventAdaptorType) {
+        List<String> encryptedProperties = new ArrayList<String>(1);
+
+        InputEventAdaptorDto dto = InputEventAdaptorHolder.getInstance().getInputEventAdaptorService().getEventAdaptorDto(eventAdaptorType);
+        if (dto != null) {
+            List<Property> properties = dto.getAdaptorPropertyList();
+            if (properties != null) {
+                for (Property prop : properties) {
+                    if (prop.isSecured()) {
+                        encryptedProperties.add(prop.getPropertyName());
+                    }
+                }
+            }
+        }
+        return encryptedProperties;
     }
 
 }

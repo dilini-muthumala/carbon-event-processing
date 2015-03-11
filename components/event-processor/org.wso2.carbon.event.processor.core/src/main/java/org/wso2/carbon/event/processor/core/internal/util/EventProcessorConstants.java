@@ -1,19 +1,20 @@
-/**
- * Copyright (c) 2005 - 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- * <p/>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+/*
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.processor.core.internal.util;
 
 
@@ -66,4 +67,29 @@ public interface EventProcessorConstants {
     String HAZELCAST_INSTANCE = "hazelcast.instance";
 
     String NO_DEPENDENCY_INFO_MSG = "No dependency information available for this event formatter";
+
+    // for storm query plan builder
+    String OPENING_BRACKETS = " ( ";
+    String SPACE = " ";
+    String COMMA = ", ";
+    String CLOSING_BRACKETS = ");";
+    String STORM_QUERY_PLAN = "storm-query-plan";
+    String INPUT_STREAMS = "input-streams";
+    String OUTPUT_STREAMS = "output-streams";
+    String EVENT_PROCESSOR_TAG = "event-processor";
+    String SIDDHI_BOLT = "SiddhiBolt";
+    String QUERIES = "queries";
+    String EVENT_RECEIVER = "event-receiver";
+    String EVENT_RECEIVER_SPOUT = "EventReceiverSpout";
+    String STREAMS = "streams";
+    String STREAM = "stream";
+    String DEFINE_STREAM = "define stream ";
+    String EVENT_PUBLISHER = "event-publisher";
+    String EVENT_PUBLISHER_BOLT = "EventPublisherBolt";
+    String PARALLEL = "parallel";
+    String NAME = "name";
+    String PARTITION = "partition";
+    String DIST = "dist";
+    String EXEC_GROUP = "execGroup";
+    String ENFORCE_PARALLELISM = "enforceParallel";
 }

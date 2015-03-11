@@ -1,5 +1,23 @@
+<%--
+~ Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+~
+~ WSO2 Inc. licenses this file to you under the Apache License,
+~ Version 2.0 (the "License"); you may not use this file except
+~ in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~    http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing,
+~ software distributed under the License is distributed on an
+~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~ KIND, either express or implied.  See the License for the
+~ specific language governing permissions and limitations
+~ under the License.
+--%>
 <%@ page import="org.wso2.carbon.event.stream.manager.stub.EventStreamAdminServiceStub" %>
 <%@ page import="org.wso2.carbon.event.stream.manager.stub.types.EventStreamAttributeDto" %>
+<%@ page import="org.wso2.carbon.event.stream.manager.stub.types.EventStreamDefinitionDto" %>
 <%@ page import="org.wso2.carbon.event.stream.manager.ui.EventStreamUIUtils" %>
 
 <%
@@ -8,12 +26,12 @@
     try {
         EventStreamAdminServiceStub stub = EventStreamUIUtils.getEventStreamAdminService(config, session, request);
 
+        EventStreamDefinitionDto eventStreamDefinitionDto = new EventStreamDefinitionDto();
         String streamId = request.getParameter("oldStreamId");
-        String eventStreamName = request.getParameter("eventStreamName");
-        String eventStreamVersion = request.getParameter("eventStreamVersion");
-        String eventStreamDescription = request.getParameter("eventStreamDescription");
-        String eventStreamNickName = request.getParameter("eventStreamNickName");
-
+        eventStreamDefinitionDto.setName(request.getParameter("eventStreamName"));
+        eventStreamDefinitionDto.setVersion(request.getParameter("eventStreamVersion"));
+        eventStreamDefinitionDto.setDescription(request.getParameter("eventStreamDescription"));
+        eventStreamDefinitionDto.setNickName(request.getParameter("eventStreamNickName"));
         String metaDataSet = request.getParameter("metaData");
         EventStreamAttributeDto[] metaWSO2EventAttributeDtos = null;
 
@@ -35,7 +53,7 @@
 
             }
         }
-
+        eventStreamDefinitionDto.setMetaData(metaWSO2EventAttributeDtos);
         String correlationDataSet = request.getParameter("correlationData");
         EventStreamAttributeDto[] correlationWSO2EventAttributeDtos = null;
 
@@ -57,6 +75,7 @@
 
             }
         }
+        eventStreamDefinitionDto.setCorrelationData(correlationWSO2EventAttributeDtos);
 
         String payloadDataSet = request.getParameter("payloadData");
         EventStreamAttributeDto[] payloadWSO2EventAttributeDtos = null;
@@ -79,8 +98,9 @@
 
             }
         }
+        eventStreamDefinitionDto.setPayloadData(payloadWSO2EventAttributeDtos);
 
-        stub.editEventStreamInfo(streamId, eventStreamName, eventStreamVersion, metaWSO2EventAttributeDtos, correlationWSO2EventAttributeDtos, payloadWSO2EventAttributeDtos, eventStreamDescription, eventStreamNickName);
+        stub.editEventStreamDefinitionAsDto(eventStreamDefinitionDto, streamId);
         msg = "true";
 
     } catch (Exception e) {

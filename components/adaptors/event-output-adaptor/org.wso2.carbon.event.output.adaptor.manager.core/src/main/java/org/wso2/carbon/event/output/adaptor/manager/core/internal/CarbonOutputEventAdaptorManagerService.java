@@ -1,19 +1,20 @@
 /*
- * Copyright 2004,2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.output.adaptor.manager.core.internal;
 
 import org.apache.axiom.om.OMElement;
@@ -22,6 +23,8 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorDto;
+import org.wso2.carbon.event.output.adaptor.core.Property;
 import org.wso2.carbon.event.output.adaptor.core.config.InternalOutputEventAdaptorConfiguration;
 import org.wso2.carbon.event.output.adaptor.core.config.OutputEventAdaptorConfiguration;
 import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorFile;
@@ -29,6 +32,7 @@ import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorInfo;
 import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorManagerService;
 import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorNotificationListener;
 import org.wso2.carbon.event.output.adaptor.manager.core.exception.OutputEventAdaptorManagerConfigurationException;
+import org.wso2.carbon.event.output.adaptor.manager.core.internal.ds.OutputEventAdaptorHolder;
 import org.wso2.carbon.event.output.adaptor.manager.core.internal.ds.OutputEventAdaptorManagerValueHolder;
 import org.wso2.carbon.event.output.adaptor.manager.core.internal.util.OutputEventAdaptorManagerConstants;
 import org.wso2.carbon.event.output.adaptor.manager.core.internal.util.helper.OutputEventAdaptorConfigurationFilesystemInvoker;
@@ -36,11 +40,7 @@ import org.wso2.carbon.event.output.adaptor.manager.core.internal.util.helper.Ou
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -80,20 +80,28 @@ public class CarbonOutputEventAdaptorManagerService
         OMElement omElement = OutputEventAdaptorConfigurationHelper.eventAdaptorConfigurationToOM(eventAdaptorConfiguration);
 
         if (OutputEventAdaptorConfigurationHelper.validateEventAdaptorConfiguration(OutputEventAdaptorConfigurationHelper.fromOM(omElement))) {
-            File directory = new File(axisConfiguration.getRepository().getPath());
+            String repoPath = axisConfiguration.getRepository().getPath();
+            File directory = new File(repoPath);
             if (!directory.exists()) {
-                if (directory.mkdir()) {
-                    throw new OutputEventAdaptorManagerConfigurationException("Cannot create directory to add tenant specific Output Event Adaptor :" + eventAdaptorName);
+                synchronized (repoPath.intern()) {
+                    if (!directory.mkdir()) {
+                        throw new OutputEventAdaptorManagerConfigurationException("Cannot create directory to add tenant specific Output Event Adaptor :" + eventAdaptorName);
+                    }
                 }
             }
-            directory = new File(directory.getAbsolutePath() + File.separator + OutputEventAdaptorManagerConstants.OEA_ELE_DIRECTORY);
+
+            String outputAdaptorConfigPath = directory.getAbsolutePath() + File.separator + OutputEventAdaptorManagerConstants.OEA_ELE_DIRECTORY;
+            directory = new File(outputAdaptorConfigPath);
             if (!directory.exists()) {
-                if (!directory.mkdir()) {
-                    throw new OutputEventAdaptorManagerConfigurationException("Cannot create directory " + OutputEventAdaptorManagerConstants.OEA_ELE_DIRECTORY + " to add tenant specific Output Event Adaptor :" + eventAdaptorName);
+                synchronized (outputAdaptorConfigPath.intern()) {
+                    if (!directory.mkdir()) {
+                        throw new OutputEventAdaptorManagerConfigurationException("Cannot create directory " + OutputEventAdaptorManagerConstants.OEA_ELE_DIRECTORY + " to add tenant specific Output Event Adaptor :" + eventAdaptorName);
+                    }
                 }
             }
             validateToRemoveInactiveEventAdaptorConfiguration(eventAdaptorName, axisConfiguration);
-            OutputEventAdaptorConfigurationFilesystemInvoker.save(omElement, eventAdaptorName, eventAdaptorName + ".xml", axisConfiguration);
+
+            OutputEventAdaptorConfigurationFilesystemInvoker.encryptAndSave(omElement, eventAdaptorName, eventAdaptorName + ".xml", axisConfiguration);
         } else {
             log.error("There is no Output Event Adaptor type called " + eventAdaptorConfiguration.getType() + " is available");
             throw new OutputEventAdaptorManagerConfigurationException("There is no Output Event Adaptor type called " + eventAdaptorConfiguration.getType() + " is available ");
@@ -179,16 +187,16 @@ public class CarbonOutputEventAdaptorManagerService
 
         try {
             OMElement omElement = AXIOMUtil.stringToOM(eventAdaptorConfiguration);
-            omElement.toString();
+            omElement.build();
             OutputEventAdaptorConfiguration eventAdaptorConfigurationObject = OutputEventAdaptorConfigurationHelper.fromOM(omElement);
             if (!eventAdaptorConfigurationObject.getName().equals(eventAdaptorName)) {
                 if (checkAdaptorValidity(tenantId, eventAdaptorConfigurationObject.getName())) {
-                    validateEventAdaptorConfiguration(tenantId, eventAdaptorName, axisConfiguration, omElement);
+                    validateAndSaveConfiguration(tenantId, eventAdaptorName, axisConfiguration, omElement);
                 } else {
                     throw new OutputEventAdaptorManagerConfigurationException("There is a Output Event Adaptor already registered with the same name");
                 }
             } else {
-                validateEventAdaptorConfiguration(tenantId, eventAdaptorName, axisConfiguration, omElement);
+                validateAndSaveConfiguration(tenantId, eventAdaptorName, axisConfiguration, omElement);
             }
 
         } catch (XMLStreamException e) {
@@ -211,7 +219,7 @@ public class CarbonOutputEventAdaptorManagerService
             if (checkAdaptorValidity(tenantId, eventAdaptorConfigurationObject.getName())) {
                 if (OutputEventAdaptorConfigurationHelper.validateEventAdaptorConfiguration(eventAdaptorConfigurationObject)) {
                     undeployInactiveOutputEventAdaptorConfiguration(filename, axisConfiguration);
-                    OutputEventAdaptorConfigurationFilesystemInvoker.save(omElement, eventAdaptorConfigurationObject.getName(), filename, axisConfiguration);
+                    OutputEventAdaptorConfigurationFilesystemInvoker.encryptAndSave(omElement, eventAdaptorConfigurationObject.getName(), filename, axisConfiguration);
                 } else {
                     log.error("There is no Output Event Adaptor type called " + eventAdaptorConfigurationObject.getType() + " is available");
                     throw new OutputEventAdaptorManagerConfigurationException("There is no Output Event Adaptor type called " + eventAdaptorConfigurationObject.getType() + " is available ");
@@ -396,7 +404,6 @@ public class CarbonOutputEventAdaptorManagerService
      * to add to the tenant specific event adaptor configuration map (only the correctly deployed event adaptors)
      *
      * @throws org.wso2.carbon.event.output.adaptor.manager.core.exception.OutputEventAdaptorManagerConfigurationException
-     *
      */
     public void addOutputEventAdaptorConfiguration(
             int tenantId, OutputEventAdaptorConfiguration eventAdaptorConfiguration)
@@ -439,9 +446,9 @@ public class CarbonOutputEventAdaptorManagerService
 
         for (OutputEventAdaptorFile outputEventAdaptorFile : outputEventAdaptorFiles) {
             try {
-                OutputEventAdaptorConfigurationFilesystemInvoker.reload(outputEventAdaptorFile.getFileName(), outputEventAdaptorFile.getAxisConfiguration());
+                OutputEventAdaptorConfigurationFilesystemInvoker.reload(outputEventAdaptorFile.getFilePath(), outputEventAdaptorFile.getAxisConfiguration());
             } catch (Exception e) {
-                log.error("Exception occurred while trying to deploy the Output Event Adaptor configuration file : " + new File(outputEventAdaptorFile.getFileName()).getName());
+                log.error("Exception occurred while trying to deploy the Output Event Adaptor configuration file : " + outputEventAdaptorFile.getFileName());
             }
         }
     }
@@ -479,7 +486,7 @@ public class CarbonOutputEventAdaptorManagerService
         undeployActiveOutputEventAdaptorConfiguration(eventAdaptorName, axisConfiguration);
         OMElement omElement = OutputEventAdaptorConfigurationHelper.eventAdaptorConfigurationToOM(outputEventAdaptorConfiguration);
         OutputEventAdaptorConfigurationFilesystemInvoker.delete(fileName, axisConfiguration);
-        OutputEventAdaptorConfigurationFilesystemInvoker.save(omElement, eventAdaptorName, fileName, axisConfiguration);
+        OutputEventAdaptorConfigurationFilesystemInvoker.encryptAndSave(omElement, eventAdaptorName, fileName, axisConfiguration);
     }
 
     /**
@@ -487,7 +494,6 @@ public class CarbonOutputEventAdaptorManagerService
      * for event adaptor configuration
      *
      * @throws org.wso2.carbon.event.output.adaptor.manager.core.exception.OutputEventAdaptorManagerConfigurationException
-     *
      */
     private void addToTenantSpecificEventAdaptorInfoMap(int tenantId,
                                                         OutputEventAdaptorConfiguration eventAdaptorConfiguration)
@@ -547,11 +553,10 @@ public class CarbonOutputEventAdaptorManagerService
      * this stores the event adaptor configuration to the file system after validating the event adaptor when doing editing
      *
      * @throws org.wso2.carbon.event.output.adaptor.manager.core.exception.OutputEventAdaptorManagerConfigurationException
-     *
      */
-    private void validateEventAdaptorConfiguration(int tenantId, String eventAdaptorName,
-                                                   AxisConfiguration axisConfiguration,
-                                                   OMElement omElement)
+    private void validateAndSaveConfiguration(int tenantId, String eventAdaptorName,
+                                              AxisConfiguration axisConfiguration,
+                                              OMElement omElement)
             throws OutputEventAdaptorManagerConfigurationException {
         OutputEventAdaptorConfiguration eventAdaptorConfiguration = OutputEventAdaptorConfigurationHelper.fromOM(omElement);
         if (OutputEventAdaptorConfigurationHelper.validateEventAdaptorConfiguration(eventAdaptorConfiguration)) {
@@ -560,7 +565,7 @@ public class CarbonOutputEventAdaptorManagerService
                 fileName = eventAdaptorName + OutputEventAdaptorManagerConstants.OEA_CONFIG_FILE_EXTENSION_WITH_DOT;
             }
             OutputEventAdaptorConfigurationFilesystemInvoker.delete(fileName, axisConfiguration);
-            OutputEventAdaptorConfigurationFilesystemInvoker.save(omElement, eventAdaptorName, fileName, axisConfiguration);
+            OutputEventAdaptorConfigurationFilesystemInvoker.encryptAndSave(omElement, eventAdaptorName, fileName, axisConfiguration);
         } else {
             log.error("There is no Output Event Adaptor type called " + eventAdaptorConfiguration.getType() + " is available ");
             throw new OutputEventAdaptorManagerConfigurationException("There is no Output Event Adaptor type called " + eventAdaptorConfiguration.getType() + " is available ");
@@ -585,6 +590,37 @@ public class CarbonOutputEventAdaptorManagerService
             }
         }
 
+    }
+
+    public boolean isOutputEventAdaptorFileAlreadyExist(int tenantId, String eventAdaptorFileName) {
+
+        if (eventAdaptorFileMap.size() > 0) {
+            List<OutputEventAdaptorFile> inputEventAdaptorFileList = eventAdaptorFileMap.get(tenantId);
+            if (inputEventAdaptorFileList != null) {
+                for (OutputEventAdaptorFile inputEventAdaptorFile : inputEventAdaptorFileList) {
+                    if ((inputEventAdaptorFile.getFileName().equals(eventAdaptorFileName))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public List<String> getEncryptedProperties(String eventAdaptorType) {
+        List<String> encryptedProperties = new ArrayList<String>(1);
+        OutputEventAdaptorDto dto = OutputEventAdaptorHolder.getInstance().getOutputEventAdaptorService().getEventAdaptorDto(eventAdaptorType);
+        if (dto != null) {
+            List<Property> properties = dto.getAdaptorPropertyList();
+            if (properties != null) {
+                for (Property prop : properties) {
+                    if (prop.isSecured()) {
+                        encryptedProperties.add(prop.getPropertyName());
+                    }
+                }
+            }
+        }
+        return encryptedProperties;
     }
 
 }

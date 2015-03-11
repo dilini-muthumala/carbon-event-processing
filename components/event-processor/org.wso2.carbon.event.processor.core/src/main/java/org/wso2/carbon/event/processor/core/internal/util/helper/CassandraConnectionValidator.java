@@ -1,37 +1,32 @@
-package org.wso2.carbon.event.processor.core.internal.util.helper;
-
 /*
-* Copyright 2004,2005 The Apache Software Foundation.
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
 *
-*      http://www.apache.org/licenses/LICENSE-2.0
+*    http://www.apache.org/licenses/LICENSE-2.0
 *
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
 */
+package org.wso2.carbon.event.processor.core.internal.util.helper;
 
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCluster;
 import me.prettyprint.hector.api.Cluster;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.cassandra.dataaccess.DataAccessComponentException;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.*;
+import java.io.File;
 import java.util.*;
 
 public class CassandraConnectionValidator {
@@ -52,7 +47,7 @@ public class CassandraConnectionValidator {
     private String nodesString;
 
     public CassandraConnectionValidator() {
-        setClusterNodes(loadConfigXML());
+//        setClusterNodes(loadConfigXML());
     }
 
     public static CassandraConnectionValidator getInstance() {
@@ -94,39 +89,39 @@ public class CassandraConnectionValidator {
         return knownPools != null && knownPools.size() > 0;
     }
 
-    private OMElement loadConfigXML() {
-
-        String carbonHome = CarbonUtils.getCarbonHome();
-        String path = carbonHome + HECTOR_CONFIG;
-        BufferedInputStream inputStream = null;
-        try {
-            File file = new File(path);
-            if (!file.exists()) {
-                log.info("There is no " + HECTOR_CONFIG + ". Using the default configuration");
-                inputStream = new BufferedInputStream(
-                        new ByteArrayInputStream(HECTOR_CONFIGURATION_TAG.getBytes()));
-            } else {
-                inputStream = new BufferedInputStream(new FileInputStream(file));
-            }
-            XMLStreamReader parser = XMLInputFactory.newInstance().
-                    createXMLStreamReader(inputStream);
-            StAXOMBuilder builder = new StAXOMBuilder(parser);
-            return builder.getDocumentElement();
-        } catch (FileNotFoundException e) {
-            throw new DataAccessComponentException(HECTOR_CONFIG + "cannot be found in the path : " + path, e, log);
-        } catch (XMLStreamException e) {
-            throw new DataAccessComponentException("Invalid XML for " + HECTOR_CONFIG + " located in " +
-                    "the path : " + path, e, log);
-        } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException ignored) {
-                //ignored
-            }
-        }
-    }
+//    private OMElement loadConfigXML() {
+//
+//        String carbonHome = CarbonUtils.getCarbonHome();
+//        String path = carbonHome + HECTOR_CONFIG;
+//        BufferedInputStream inputStream = null;
+//        try {
+//            File file = new File(path);
+//            if (!file.exists()) {
+//                log.info("There is no " + HECTOR_CONFIG + ". Using the default configuration");
+//                inputStream = new BufferedInputStream(
+//                        new ByteArrayInputStream(HECTOR_CONFIGURATION_TAG.getBytes()));
+//            } else {
+//                inputStream = new BufferedInputStream(new FileInputStream(file));
+//            }
+//            XMLStreamReader parser = XMLInputFactory.newInstance().
+//                    createXMLStreamReader(inputStream);
+//            StAXOMBuilder builder = new StAXOMBuilder(parser);
+//            return builder.getDocumentElement();
+//        } catch (FileNotFoundException e) {
+//            throw new DataAccessComponentException(HECTOR_CONFIG + "cannot be found in the path : " + path, e, log);
+//        } catch (XMLStreamException e) {
+//            throw new DataAccessComponentException("Invalid XML for " + HECTOR_CONFIG + " located in " +
+//                    "the path : " + path, e, log);
+//        } finally {
+//            try {
+//                if (inputStream != null) {
+//                    inputStream.close();
+//                }
+//            } catch (IOException ignored) {
+//                //ignored
+//            }
+//        }
+//    }
 
     private void setClusterNodes(OMElement severElement) {
         OMElement cluster = severElement.getFirstChildWithName(new QName(CLUSTER_TAG));

@@ -1,19 +1,20 @@
 /*
- * Copyright 2004,2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.output.adaptor.mqtt;
 
 import org.apache.commons.logging.Log;
@@ -205,7 +206,7 @@ public final class MQTTEventAdaptorType extends AbstractOutputEventAdaptor {
         if (mqttAdaptorPublisher == null) {
             MQTTBrokerConnectionConfiguration mqttBrokerConnectionConfiguration = new MQTTBrokerConnectionConfiguration(outputEventAdaptorConfiguration.getOutputProperties().get(MQTTEventAdaptorConstants.ADAPTOR_CONF_URL), outputEventAdaptorConfiguration.getOutputProperties().get(MQTTEventAdaptorConstants.ADAPTOR_CONF_USERNAME), outputEventAdaptorConfiguration.getOutputProperties().get(MQTTEventAdaptorConstants.ADAPTOR_CONF_PASSWORD), outputEventAdaptorConfiguration.getOutputProperties().get(MQTTEventAdaptorConstants.ADAPTOR_CONF_CLEAN_SESSION), outputEventAdaptorConfiguration.getOutputProperties().get(MQTTEventAdaptorConstants.ADAPTOR_CONF_KEEP_ALIVE));
             mqttAdaptorPublisher = new MQTTAdaptorPublisher(mqttBrokerConnectionConfiguration, outputEventAdaptorMessageConfiguration.getOutputMessageProperties().get(MQTTEventAdaptorConstants.ADAPTOR_MESSAGE_TOPIC), outputEventAdaptorMessageConfiguration.getOutputMessageProperties().get(MQTTEventAdaptorConstants.ADAPTOR_MESSAGE_CLIENTID));
-
+            topicSpecificEventPublisherMap.put(topic,mqttAdaptorPublisher);
         }
         String qos = outputEventAdaptorMessageConfiguration.getOutputMessageProperties().get(MQTTEventAdaptorConstants.ADAPTOR_MESSAGE_QOS);
 

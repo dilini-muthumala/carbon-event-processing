@@ -1,3 +1,20 @@
+/*
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.event.formatter.core.internal;
 
 import org.apache.axiom.om.OMElement;
@@ -21,6 +38,7 @@ import org.wso2.carbon.event.formatter.core.internal.util.helper.EventFormatterC
 import org.wso2.carbon.event.output.adaptor.core.OutputEventAdaptorService;
 import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorManagerService;
 import org.wso2.carbon.event.output.adaptor.manager.core.exception.OutputEventAdaptorManagerConfigurationException;
+import org.wso2.carbon.event.stream.manager.core.EventStreamConfig;
 import org.wso2.carbon.event.stream.manager.core.EventStreamService;
 import org.wso2.carbon.event.stream.manager.core.exception.EventProducerException;
 import org.wso2.carbon.event.stream.manager.core.exception.EventStreamConfigurationException;
@@ -61,18 +79,25 @@ public class CarbonEventFormatterService
         OMElement omElement = FormatterConfigurationBuilder.eventFormatterConfigurationToOM(eventFormatterConfiguration);
         EventFormatterConfigurationHelper.validateEventFormatterConfiguration(omElement);
         if (EventFormatterConfigurationHelper.getOutputMappingType(omElement) != null) {
-
-            File directory = new File(axisConfiguration.getRepository().getPath());
+            String repoPath = axisConfiguration.getRepository().getPath();
+            File directory = new File(repoPath);
             if (!directory.exists()) {
-                if (directory.mkdir()) {
-                    throw new EventFormatterConfigurationException("Cannot create directory to add tenant specific Event Formatter : " + eventFormatterName);
+                synchronized (repoPath.intern()) {
+                    if (!directory.mkdir()) {
+                        throw new EventFormatterConfigurationException("Cannot create directory to add tenant specific Event Formatter : " + eventFormatterName);
+                    }
                 }
             }
-            directory = new File(directory.getAbsolutePath() + File.separator + EventFormatterConstants.TM_ELE_DIRECTORY);
+
+            String eventFormatterConfigPath = directory.getAbsolutePath() + File.separator + EventFormatterConstants.TM_ELE_DIRECTORY;
+            directory = new File(eventFormatterConfigPath);
             if (!directory.exists()) {
-                if (!directory.mkdir()) {
-                    throw new EventFormatterConfigurationException("Cannot create directory " + EventFormatterConstants.TM_ELE_DIRECTORY + " to add tenant specific event adaptor :" + eventFormatterName);
+                synchronized (eventFormatterConfigPath.intern()) {
+                    if (!directory.mkdir()) {
+                        throw new EventFormatterConfigurationException("Cannot create directory " + EventFormatterConstants.TM_ELE_DIRECTORY + " to add tenant specific event adaptor :" + eventFormatterName);
+                    }
                 }
+
             }
             validateToRemoveInactiveEventFormatterConfiguration(eventFormatterName, axisConfiguration);
             EventFormatterConfigurationFilesystemInvoker.save(omElement, eventFormatterName + ".xml", axisConfiguration);
@@ -356,7 +381,7 @@ public class CarbonEventFormatterService
         OutputEventAdaptorManagerService outputEventAdaptorManagerService = EventFormatterServiceValueHolder.getOutputEventAdaptorManagerService();
         try {
             String defaultFormatterFilename = streamId.replaceAll(EventFormatterConstants.STREAM_ID_SEPERATOR, EventFormatterConstants.NORMALIZATION_STRING)
-                    + EventFormatterConstants.DEFAULT_EVENT_FORMATTER_POSTFIX + EventFormatterConstants.EF_CONFIG_FILE_EXTENSION_WITH_DOT;
+                                              + EventFormatterConstants.DEFAULT_EVENT_FORMATTER_POSTFIX + EventFormatterConstants.EF_CONFIG_FILE_EXTENSION_WITH_DOT;
             if (!EventFormatterConfigurationFilesystemInvoker.isEventFormatterConfigurationFileExists(defaultFormatterFilename, axisConfiguration)) {
                 String eventAdaptorName = outputEventAdaptorManagerService.getDefaultLoggerEventAdaptor(axisConfiguration);
                 EventFormatterConfiguration defaultEventFormatterConfiguration =
@@ -445,7 +470,8 @@ public class CarbonEventFormatterService
         }
     }
 
-    public void activateInactiveEventFormatterConfigurationForAdaptor(int tenantId, String dependency)
+    public void activateInactiveEventFormatterConfigurationForAdaptor(int tenantId,
+                                                                      String dependency)
             throws EventFormatterConfigurationException {
 
         List<EventFormatterConfigurationFile> fileList = new ArrayList<EventFormatterConfigurationFile>();
@@ -463,9 +489,9 @@ public class CarbonEventFormatterService
         }
         for (EventFormatterConfigurationFile eventFormatterConfigurationFile : fileList) {
             try {
-                EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFileName(), eventFormatterConfigurationFile.getAxisConfiguration());
+                EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFilePath(), eventFormatterConfigurationFile.getAxisConfiguration());
             } catch (Exception e) {
-                log.error("Exception occurred while trying to deploy the Event formatter configuration file : " + new File(eventFormatterConfigurationFile.getFileName()).getName(), e);
+                log.error("Exception occurred while trying to deploy the Event formatter configuration file : " + eventFormatterConfigurationFile.getFileName(), e);
             }
         }
     }
@@ -488,14 +514,15 @@ public class CarbonEventFormatterService
         }
         for (EventFormatterConfigurationFile eventFormatterConfigurationFile : fileList) {
             try {
-                EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFileName(), eventFormatterConfigurationFile.getAxisConfiguration());
+                EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFilePath(), eventFormatterConfigurationFile.getAxisConfiguration());
             } catch (Exception e) {
                 log.error("Exception occurred while trying to deploy the Event formatter configuration file : " + new File(eventFormatterConfigurationFile.getFileName()).getName(), e);
             }
         }
     }
 
-    public void deactivateActiveEventFormatterConfigurationForAdaptor(int tenantId, String dependency)
+    public void deactivateActiveEventFormatterConfigurationForAdaptor(int tenantId,
+                                                                      String dependency)
             throws EventFormatterConfigurationException {
         OutputEventAdaptorService eventAdaptorService = EventFormatterServiceValueHolder.getOutputEventAdaptorService();
         List<EventFormatterConfigurationFile> fileList = new ArrayList<EventFormatterConfigurationFile>();
@@ -516,7 +543,7 @@ public class CarbonEventFormatterService
         }
 
         for (EventFormatterConfigurationFile eventFormatterConfigurationFile : fileList) {
-            EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFileName(), eventFormatterConfigurationFile.getAxisConfiguration());
+            EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFilePath(), eventFormatterConfigurationFile.getAxisConfiguration());
             log.info("Event formatter : " + eventFormatterConfigurationFile.getEventFormatterName() + "  is in inactive state because dependency could not be found : " + dependency);
         }
     }
@@ -542,7 +569,7 @@ public class CarbonEventFormatterService
         }
 
         for (EventFormatterConfigurationFile eventFormatterConfigurationFile : fileList) {
-            EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFileName(), eventFormatterConfigurationFile.getAxisConfiguration());
+            EventFormatterConfigurationFilesystemInvoker.reload(eventFormatterConfigurationFile.getFilePath(), eventFormatterConfigurationFile.getAxisConfiguration());
             log.info("Event formatter : " + eventFormatterConfigurationFile.getEventFormatterName() + "  is in inactive state because stream dependency could not be found : " + streamId);
         }
     }
@@ -588,7 +615,7 @@ public class CarbonEventFormatterService
             EventFormatterConfigurationHelper.validateEventFormatterConfiguration(omElement);
             String mappingType = EventFormatterConfigurationHelper.getOutputMappingType(omElement);
             if (mappingType != null) {
-                EventFormatterConfiguration eventFormatterConfigurationObject = FormatterConfigurationBuilder.getEventFormatterConfiguration(omElement, tenantId, mappingType);
+                EventFormatterConfiguration eventFormatterConfigurationObject = FormatterConfigurationBuilder.getEventFormatterConfiguration(omElement, true, tenantId, mappingType);
                 if (!(eventFormatterConfigurationObject.getEventFormatterName().equals(originalEventFormatterName))) {
                     if (checkEventFormatterValidity(tenantId, eventFormatterConfigurationObject.getEventFormatterName())) {
                         EventFormatterConfigurationFilesystemInvoker.delete(filename, axisConfiguration);
@@ -645,5 +672,20 @@ public class CarbonEventFormatterService
         }
 
     }
+
+    public boolean isEventFormatterFileAlreadyExist(String eventFormatterFileName, int tenantId) {
+        if (eventFormatterConfigurationFileMap.size() > 0) {
+            List<EventFormatterConfigurationFile> eventFormatterConfigurationFiles = eventFormatterConfigurationFileMap.get(tenantId);
+            if (eventFormatterConfigurationFiles != null) {
+                for (EventFormatterConfigurationFile eventFormatterConfigurationFile : eventFormatterConfigurationFiles) {
+                    if ((eventFormatterConfigurationFile.getFileName().equals(eventFormatterFileName))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
 }

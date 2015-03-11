@@ -1,20 +1,23 @@
-package org.wso2.carbon.event.output.adaptor.manager.core.internal.util.helper;
 /*
- * Copyright 2004,2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+*  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
+package org.wso2.carbon.event.output.adaptor.manager.core.internal.util.helper;
 
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.deployment.Deployer;
 import org.apache.axis2.deployment.DeploymentEngine;
@@ -23,17 +26,19 @@ import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.event.output.adaptor.core.config.InternalOutputEventAdaptorConfiguration;
 import org.wso2.carbon.event.output.adaptor.manager.core.OutputEventAdaptorDeployer;
 import org.wso2.carbon.event.output.adaptor.manager.core.exception.OutputEventAdaptorManagerConfigurationException;
+import org.wso2.carbon.event.output.adaptor.manager.core.internal.ds.OutputEventAdaptorManagerValueHolder;
 import org.wso2.carbon.event.output.adaptor.manager.core.internal.util.OutputEventAdaptorManagerConstants;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import javax.xml.namespace.QName;
+import java.io.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class used to do the file system related tasks
@@ -45,21 +50,51 @@ public final class OutputEventAdaptorConfigurationFilesystemInvoker {
     private OutputEventAdaptorConfigurationFilesystemInvoker() {
     }
 
-    public static void save(OMElement eventAdaptorElement,
-                            String fileName, String pathInFileSystem,
-                            AxisConfiguration axisConfiguration)
+    public static void encryptAndSave(OMElement eventAdaptorElement,
+                                      String fileName, String pathInFileSystem,
+                                      AxisConfiguration axisConfiguration)
             throws OutputEventAdaptorManagerConfigurationException {
 
+        String adaptorType = eventAdaptorElement.getAttributeValue(new QName(OutputEventAdaptorManagerConstants.OEA_ATTR_TYPE));
+        List<String> encryptedProperties = OutputEventAdaptorManagerValueHolder.getCarbonEventAdaptorManagerService().getEncryptedProperties(adaptorType);
+
+        Iterator propertyIter = eventAdaptorElement.getChildrenWithName(
+                new QName(OutputEventAdaptorManagerConstants.OEA_CONF_NS, OutputEventAdaptorManagerConstants.OEA_ELE_PROPERTY));
+        InternalOutputEventAdaptorConfiguration outputEventAdaptorPropertyConfiguration = new InternalOutputEventAdaptorConfiguration();
+        if (propertyIter.hasNext()) {
+            while (propertyIter.hasNext()) {
+                OMElement propertyOMElement = (OMElement) propertyIter.next();
+                String name = propertyOMElement.getAttributeValue(
+                        new QName(OutputEventAdaptorManagerConstants.OEA_ATTR_NAME));
+
+                if (encryptedProperties.contains(name.trim())) {
+                OMAttribute encryptedAttribute = propertyOMElement.getAttribute(new QName(OutputEventAdaptorManagerConstants.OEA_ATTR_ENCRYPTED));
+
+                    if (encryptedAttribute == null || (!"true".equals(encryptedAttribute.getAttributeValue()))) {
+                        String value = propertyOMElement.getText();
+
+                        try {
+                            value = new String(CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(value.getBytes()));
+                            propertyOMElement.setText(value);
+                            propertyOMElement.addAttribute(OutputEventAdaptorManagerConstants.OEA_ATTR_ENCRYPTED, "true", null);
+                        } catch (Exception e) {
+                            log.error("Unable to decrypt the encrypted field: " + name + " for adaptor type: " + adaptorType);
+                            propertyOMElement.setText("");
+                        }
+                    }
+                }
+            }
+        }
         OutputEventAdaptorConfigurationFilesystemInvoker.save(eventAdaptorElement.toString(), fileName, pathInFileSystem, axisConfiguration);
     }
 
-    public static void save(String eventAdaptorConfig, String eventAdaptorName,
+    private static void save(String eventAdaptorConfig, String eventAdaptorName,
                             String fileName, AxisConfiguration axisConfiguration)
             throws OutputEventAdaptorManagerConfigurationException {
         OutputEventAdaptorDeployer deployer = (OutputEventAdaptorDeployer) getDeployer(axisConfiguration, OutputEventAdaptorManagerConstants.OEA_ELE_DIRECTORY);
         String filePath = getFilePathFromFilename(fileName, axisConfiguration);
         try {
-            /* save contents to .xml file */
+            /* Save contents to .xml file */
             BufferedWriter out = new BufferedWriter(new FileWriter(filePath));
             String xmlContent = new XmlFormatter().format(eventAdaptorConfig);
             deployer.getDeployedEventAdaptorFilePaths().add(filePath);
@@ -104,10 +139,9 @@ public final class OutputEventAdaptorConfigurationFilesystemInvoker {
         return deploymentEngine.getDeployer(endpointDirPath, "xml");
     }
 
-    public static void reload(String fileName, AxisConfiguration axisConfiguration)
+    public static void reload(String filePath, AxisConfiguration axisConfiguration)
             throws OutputEventAdaptorManagerConfigurationException {
         OutputEventAdaptorDeployer deployer = (OutputEventAdaptorDeployer) getDeployer(axisConfiguration, OutputEventAdaptorManagerConstants.OEA_ELE_DIRECTORY);
-        String filePath = getFilePathFromFilename(fileName, axisConfiguration);
         DeploymentFileData deploymentFileData = new DeploymentFileData(new File(filePath));
         try {
             deployer.processUndeploy(filePath);

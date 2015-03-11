@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<<<<<<< HEAD
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
@@ -6,18 +7,62 @@
         <groupId>org.wso2.carbon</groupId>
         <artifactId>event-output-adaptor-feature</artifactId>
         <version>2.0.0-SNAPSHOT</version>
+=======
+<!--
+~ Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+~
+~ WSO2 Inc. licenses this file to you under the Apache License,
+~ Version 2.0 (the "License"); you may not use this file except
+~ in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~    http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing,
+~ software distributed under the License is distributed on an
+~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~ KIND, either express or implied.  See the License for the
+~ specific language governing permissions and limitations
+~ under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <parent>
+        <groupId>org.wso2.carbon.event-processing</groupId>
+        <artifactId>event-output-adaptor-feature</artifactId>
+        <version>2.0.4-SNAPSHOT</version>
+>>>>>>> f2861ad70422867e7d5031a219a3f5415c6553f9
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.event.output.adaptor.websocket.server.feature</artifactId>
     <packaging>pom</packaging>
+<<<<<<< HEAD
     <name>WSO2 Carbon - Output Websocket Adaptor Server Feature</name>
     <version>1.0.0-SNAPSHOT</version>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Output Websocket Event Adaptor functionality</description>
 
 
+=======
+    <name>WSO2 Carbon - Event Output Websocket Adaptor Server Feature</name>
+    <version>2.0.4-SNAPSHOT</version>
+    <url>http://wso2.org</url>
+    <description>This feature contains the bundles required for Websocket Event Adaptor functionality</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jaxb-api-2.0</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.tyrus.bundles.wso2</groupId>
+            <artifactId>tyrus-standalone-client</artifactId>
+        </dependency>
+    </dependencies>
+>>>>>>> f2861ad70422867e7d5031a219a3f5415c6553f9
     <build>
         <plugins>
             <plugin>
@@ -44,11 +89,26 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
+<<<<<<< HEAD
                                     org.wso2.carbon:org.wso2.carbon.event.output.adaptor.websocket:${carbon.event.processing.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.version}
+=======
+                                    org.wso2.carbon.event-processing:org.wso2.carbon.event.output.adaptor.websocket:${carbon.event.processing.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.glassfish.tyrus.bundles.wso2:tyrus-standalone-client:1.7-wso2v1
+                                </bundleDef>
+                                <bundleDef>
+                                    <!--javax.xml.bind:jaxb-api:2.1-->
+                                    org.apache.servicemix.bundles:org.apache.servicemix.bundles.jaxb-api-2.0:4.0-m1
+                                </bundleDef>
+                            </bundles>
+                            <importFeatures>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}
+>>>>>>> f2861ad70422867e7d5031a219a3f5415c6553f9
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>

@@ -1,70 +1,81 @@
+/*
+ * Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package org.wso2.carbon.event.processor.core.internal.storm;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
-import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
+import org.wso2.carbon.event.processor.common.storm.config.StormDeploymentConfig;
+import org.wso2.carbon.event.processor.common.util.AsyncEventPublisher;
 import org.wso2.carbon.event.processor.core.ExecutionPlanConfiguration;
 import org.wso2.carbon.event.processor.core.StreamConfiguration;
-import org.wso2.carbon.event.processor.core.internal.ha.server.utils.HostAddressFinder;
 import org.wso2.carbon.event.processor.core.internal.listener.AbstractSiddhiInputEventDispatcher;
 import org.wso2.carbon.event.processor.core.internal.util.EventProcessorUtil;
-import org.wso2.carbon.event.processor.storm.common.client.ManagerServiceClient;
-import org.wso2.carbon.event.processor.storm.common.client.ManagerServiceClientCallback;
-import org.wso2.carbon.event.processor.storm.common.helper.StormDeploymentConfigurations;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.util.collection.Pair;
 
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Publishes events of a stream to the event receiver spout running on Storm. There will be SiddhiStormInputEventDispatcher
  * instance for each imported stream of execution plan
  */
-public class SiddhiStormInputEventDispatcher extends AbstractSiddhiInputEventDispatcher implements ManagerServiceClientCallback {
+public class SiddhiStormInputEventDispatcher extends AbstractSiddhiInputEventDispatcher {
     private static final Log log = LogFactory.getLog(SiddhiStormInputEventDispatcher.class);
+    private final StormDeploymentConfig stormDeploymentConfig;
+    private final ExecutionPlanConfiguration executionPlanConfiguration;
 
-    private AsyncDataPublisher dataPublisher = null;
-    private String streamVersion;
-    private String cepManagerHost = StormDeploymentConfigurations.getCepManagerHost();
-    private int cepManagerPort = StormDeploymentConfigurations.getCepManagerPort();
-    private StreamDefinition flattenedStreamDefinition;
+    private org.wso2.siddhi.query.api.definition.StreamDefinition siddhiStreamDefinition;
+    private String logPrefix;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private AsyncEventPublisher asyncEventPublisher;
 
-    public SiddhiStormInputEventDispatcher(StreamDefinition streamDefinition,
-                                           String siddhiStreamName,
-                                           ExecutionPlanConfiguration executionPlanConfiguration,
-                                           int tenantId) {
-        super(streamDefinition.getStreamId(), siddhiStreamName, executionPlanConfiguration, tenantId);
-        init(streamDefinition);
+    public SiddhiStormInputEventDispatcher(StreamDefinition streamDefinition, String siddhiStreamId,
+                                           ExecutionPlanConfiguration executionPlanConfiguration, int tenantId,
+                                           StormDeploymentConfig stormDeploymentConfig) {
+        super(streamDefinition.getStreamId(), siddhiStreamId, executionPlanConfiguration, tenantId);
+        this.executionPlanConfiguration = executionPlanConfiguration;
+        this.stormDeploymentConfig = stormDeploymentConfig;
+        init(streamDefinition, siddhiStreamId, executionPlanConfiguration);
     }
 
-    private void init(StreamDefinition streamDefinition){
-        String thisHostIp = null;
+    private void init(StreamDefinition streamDefinition, String siddhiStreamName, ExecutionPlanConfiguration executionPlanConfiguration) {
+        logPrefix = "[CEP Receiver|ExecPlan:" + executionPlanConfiguration.getName() + ", Tenant:" + tenantId + ", Stream:" + siddhiStreamName + "]";
+
         try {
-            thisHostIp =  HostAddressFinder.findAddress("localhost");
-        } catch (SocketException e) {
-            log.error("Cannot find IP address of the host");
-        }
-        // Creating a data bridge stream equivalent to the Siddhi stream handled by this input event dispatcher
-        // by creating a data bridge stream which has name as the Siddhi stream name, and all fields as payload
-        // fields just like in Siddhi streams.
-        org.wso2.siddhi.query.api.definition.StreamDefinition siddhiStreamDefinition =
-                EventProcessorUtil.convertToSiddhiStreamDefinition(streamDefinition, new StreamConfiguration(streamDefinition.getName(), streamDefinition.getVersion()));
+            this.siddhiStreamDefinition = EventProcessorUtil.convertToSiddhiStreamDefinition(streamDefinition, siddhiStreamName);
+            Set<org.wso2.siddhi.query.api.definition.StreamDefinition> streamDefinitions = new HashSet<org.wso2.siddhi.query.api.definition.StreamDefinition>();
+            streamDefinitions.add(siddhiStreamDefinition);
 
-        List<Attribute> streamFields = new ArrayList<Attribute>();
-        for (org.wso2.siddhi.query.api.definition.Attribute siddhiAttribute : siddhiStreamDefinition.getAttributeList()){
-            streamFields.add(EventProcessorUtil.convertToDatabridgeAttribute(siddhiAttribute, null));
-        }
-        flattenedStreamDefinition = new StreamDefinition(super.siddhiStreamId);
-        flattenedStreamDefinition.setPayloadData(streamFields);
-        streamVersion = flattenedStreamDefinition.getVersion();
+            asyncEventPublisher = new AsyncEventPublisher(AsyncEventPublisher.DestinationType.STORM_RECEIVER,
+                                                          streamDefinitions,
+                                                          stormDeploymentConfig.getManagers().get(0).getHostName(),
+                                                          stormDeploymentConfig.getManagers().get(0).getPort(),
+                                                          executionPlanConfiguration.getName(),
+                                                          tenantId,
+                                                          stormDeploymentConfig);
 
-        ManagerServiceClient client = new ManagerServiceClient(cepManagerHost, cepManagerPort, this);
-        client.getStormReceiver(super.getExecutionPlanName(), super.tenantId, StormDeploymentConfigurations.getReconnectInterval(), thisHostIp);
+            asyncEventPublisher.initializeConnection(false);
+        } catch (Exception e) {
+            log.error(logPrefix + "Failed to start event listener", e);
+        }
     }
 
     @Override
@@ -74,26 +85,12 @@ public class SiddhiStormInputEventDispatcher extends AbstractSiddhiInputEventDis
 
     @Override
     public void sendEvent(Object[] eventData) throws InterruptedException {
-        try {
-            if (dataPublisher != null){
-                dataPublisher.publish(super.siddhiStreamId, streamVersion, null, null, eventData);
-            }else{
-                log.warn("Dropping the event since the data publisher is not yet initialized for " + super.getExecutionPlanName() + ":" + super.tenantId);
-            }
-        } catch (AgentException e) {
-            log.error("Error while publishing data", e);
-        }
+        asyncEventPublisher.sendEvent(eventData, this.siddhiStreamDefinition.getId());
     }
 
     @Override
-    public void OnResponseReceived(Pair<String, Integer> endpoint) {
-        synchronized (this){
-            dataPublisher = new AsyncDataPublisher("tcp://" + endpoint.getOne() + ":" + endpoint.getTwo(), "admin", "admin");
-            dataPublisher.addStreamDefinition(flattenedStreamDefinition);
-        }
-
-        log.info("[CEP Receiver]Storm input dispatcher connecting to Storm event receiver at " + endpoint.getOne() + ":" + endpoint.getTwo()
-                + " for the Stream '" + super.siddhiStreamId + "' of ExecutionPlan '" + super.getExecutionPlanName()
-                + "' (TenantID=" + super.tenantId +")");
+    public void shutdown() {
+        asyncEventPublisher.shutdown();
+        executorService.shutdown();
     }
 }

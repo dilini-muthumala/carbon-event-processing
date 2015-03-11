@@ -1,4 +1,5 @@
 /**
+ *
  * vkBeautify - javascript plugin to pretty-print or minify text in XML, JSON, CSS and SQL formats.
  *
  * Version - 0.99.00.beta
@@ -9,6 +10,26 @@
  * Dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
+ *
+ * The MIT License (MIT)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  *
  *   Pretty print
  *
@@ -111,16 +132,16 @@
     vkbeautify.prototype.xml = function (text, step) {
 
         var ar = text.replace(/>\s{0,}</g, "><")
-                        .replace(/</g, "~::~<")
-                        .replace(/\s*xmlns\:/g, "~::~xmlns:")
-                        .replace(/\s*xmlns\=/g, "~::~xmlns=")
-                        .split('~::~'),
-                len = ar.length,
-                inComment = false,
-                deep = 0,
-                str = '',
-                ix = 0,
-                shift = step ? createShiftArr(step) : this.shift;
+                .replace(/</g, "~::~<")
+                .replace(/\s*xmlns\:/g, "~::~xmlns:")
+                .replace(/\s*xmlns\=/g, "~::~xmlns=")
+                .split('~::~'),
+            len = ar.length,
+            inComment = false,
+            deep = 0,
+            str = '',
+            ix = 0,
+            shift = step ? createShiftArr(step) : this.shift;
 
         for (ix = 0; ix < len; ix++) {
             // start comment or <![CDATA[...]]> or <!DOCTYPE //
@@ -199,18 +220,18 @@
     vkbeautify.prototype.css = function (text, step) {
 
         var ar = text.replace(/\s{1,}/g, ' ')
-                        .replace(/\{/g, "{~::~")
-                        .replace(/\}/g, "~::~}~::~")
-                        .replace(/\;/g, ";~::~")
-                        .replace(/\/\*/g, "~::~/*")
-                        .replace(/\*\//g, "*/~::~")
-                        .replace(/~::~\s{0,}~::~/g, "~::~")
-                        .split('~::~'),
-                len = ar.length,
-                deep = 0,
-                str = '',
-                ix = 0,
-                shift = step ? createShiftArr(step) : this.shift;
+                .replace(/\{/g, "{~::~")
+                .replace(/\}/g, "~::~}~::~")
+                .replace(/\;/g, ";~::~")
+                .replace(/\/\*/g, "~::~/*")
+                .replace(/\*\//g, "*/~::~")
+                .replace(/~::~\s{0,}~::~/g, "~::~")
+                .split('~::~'),
+            len = ar.length,
+            deep = 0,
+            str = '',
+            ix = 0,
+            shift = step ? createShiftArr(step) : this.shift;
 
         for (ix = 0; ix < len; ix++) {
 
@@ -238,73 +259,73 @@
 
         return str.replace(/\s{1,}/g, " ")
 
-                .replace(/ AND /ig, "~::~" + tab + tab + "AND ")
-                .replace(/ BETWEEN /ig, "~::~" + tab + "BETWEEN ")
-                .replace(/ CASE /ig, "~::~" + tab + "CASE ")
-                .replace(/ ELSE /ig, "~::~" + tab + "ELSE ")
-                .replace(/ END /ig, "~::~" + tab + "END ")
-                .replace(/ FROM /ig, "~::~FROM ")
-                .replace(/ GROUP\s{1,}BY/ig, "~::~GROUP BY ")
-                .replace(/ HAVING /ig, "~::~HAVING ")
+            .replace(/ AND /ig, "~::~" + tab + tab + "AND ")
+            .replace(/ BETWEEN /ig, "~::~" + tab + "BETWEEN ")
+            .replace(/ CASE /ig, "~::~" + tab + "CASE ")
+            .replace(/ ELSE /ig, "~::~" + tab + "ELSE ")
+            .replace(/ END /ig, "~::~" + tab + "END ")
+            .replace(/ FROM /ig, "~::~FROM ")
+            .replace(/ GROUP\s{1,}BY/ig, "~::~GROUP BY ")
+            .replace(/ HAVING /ig, "~::~HAVING ")
             //.replace(/ SET /ig," SET~::~")
-                .replace(/ IN /ig, " IN ")
+            .replace(/ IN /ig, " IN ")
 
-                .replace(/ JOIN /ig, "~::~JOIN ")
-                .replace(/ CROSS~::~{1,}JOIN /ig, "~::~CROSS JOIN ")
-                .replace(/ INNER~::~{1,}JOIN /ig, "~::~INNER JOIN ")
-                .replace(/ LEFT~::~{1,}JOIN /ig, "~::~LEFT JOIN ")
-                .replace(/ RIGHT~::~{1,}JOIN /ig, "~::~RIGHT JOIN ")
+            .replace(/ JOIN /ig, "~::~JOIN ")
+            .replace(/ CROSS~::~{1,}JOIN /ig, "~::~CROSS JOIN ")
+            .replace(/ INNER~::~{1,}JOIN /ig, "~::~INNER JOIN ")
+            .replace(/ LEFT~::~{1,}JOIN /ig, "~::~LEFT JOIN ")
+            .replace(/ RIGHT~::~{1,}JOIN /ig, "~::~RIGHT JOIN ")
 
-                .replace(/ ON /ig, "~::~" + tab + "ON ")
-                .replace(/ OR /ig, "~::~" + tab + tab + "OR ")
-                .replace(/ ORDER\s{1,}BY/ig, "~::~ORDER BY ")
-                .replace(/ OVER /ig, "~::~" + tab + "OVER ")
+            .replace(/ ON /ig, "~::~" + tab + "ON ")
+            .replace(/ OR /ig, "~::~" + tab + tab + "OR ")
+            .replace(/ ORDER\s{1,}BY/ig, "~::~ORDER BY ")
+            .replace(/ OVER /ig, "~::~" + tab + "OVER ")
 
-                .replace(/\(\s{0,}SELECT /ig, "~::~(SELECT ")
-                .replace(/\)\s{0,}SELECT /ig, ")~::~SELECT ")
+            .replace(/\(\s{0,}SELECT /ig, "~::~(SELECT ")
+            .replace(/\)\s{0,}SELECT /ig, ")~::~SELECT ")
 
-                .replace(/ THEN /ig, " THEN~::~" + tab + "")
-                .replace(/ UNION /ig, "~::~UNION~::~")
-                .replace(/ USING /ig, "~::~USING ")
-                .replace(/ WHEN /ig, "~::~" + tab + "WHEN ")
-                .replace(/ WHERE /ig, "~::~WHERE ")
-                .replace(/ WITH /ig, "~::~WITH ")
+            .replace(/ THEN /ig, " THEN~::~" + tab + "")
+            .replace(/ UNION /ig, "~::~UNION~::~")
+            .replace(/ USING /ig, "~::~USING ")
+            .replace(/ WHEN /ig, "~::~" + tab + "WHEN ")
+            .replace(/ WHERE /ig, "~::~WHERE ")
+            .replace(/ WITH /ig, "~::~WITH ")
 
             //.replace(/\,\s{0,}\(/ig,",~::~( ")
             //.replace(/\,/ig,",~::~"+tab+tab+"")
 
-                .replace(/ ALL /ig, " ALL ")
-                .replace(/ AS /ig, " AS ")
-                .replace(/ ASC /ig, " ASC ")
-                .replace(/ DESC /ig, " DESC ")
-                .replace(/ DISTINCT /ig, " DISTINCT ")
-                .replace(/ EXISTS /ig, " EXISTS ")
-                .replace(/ NOT /ig, " NOT ")
-                .replace(/ NULL /ig, " NULL ")
-                .replace(/ LIKE /ig, " LIKE ")
-                .replace(/\s{0,}SELECT /ig, "SELECT ")
-                .replace(/\s{0,}UPDATE /ig, "UPDATE ")
-                .replace(/ SET /ig, " SET ")
+            .replace(/ ALL /ig, " ALL ")
+            .replace(/ AS /ig, " AS ")
+            .replace(/ ASC /ig, " ASC ")
+            .replace(/ DESC /ig, " DESC ")
+            .replace(/ DISTINCT /ig, " DISTINCT ")
+            .replace(/ EXISTS /ig, " EXISTS ")
+            .replace(/ NOT /ig, " NOT ")
+            .replace(/ NULL /ig, " NULL ")
+            .replace(/ LIKE /ig, " LIKE ")
+            .replace(/\s{0,}SELECT /ig, "SELECT ")
+            .replace(/\s{0,}UPDATE /ig, "UPDATE ")
+            .replace(/ SET /ig, " SET ")
 
-                .replace(/~::~{1,}/g, "~::~")
-                .split('~::~');
+            .replace(/~::~{1,}/g, "~::~")
+            .split('~::~');
     }
 
     vkbeautify.prototype.sql = function (text, step) {
 
         var ar_by_quote = text.replace(/\s{1,}/g, " ")
-                        .replace(/\'/ig, "~::~\'")
-                        .split('~::~'),
-                len = ar_by_quote.length,
-                ar = [],
-                deep = 0,
-                tab = this.step, //+this.step,
-                inComment = true,
-                inQuote = false,
-                parenthesisLevel = 0,
-                str = '',
-                ix = 0,
-                shift = step ? createShiftArr(step) : this.shift;
+                .replace(/\'/ig, "~::~\'")
+                .split('~::~'),
+            len = ar_by_quote.length,
+            ar = [],
+            deep = 0,
+            tab = this.step, //+this.step,
+            inComment = true,
+            inQuote = false,
+            parenthesisLevel = 0,
+            str = '',
+            ix = 0,
+            shift = step ? createShiftArr(step) : this.shift;
         ;
 
         for (ix = 0; ix < len; ix++) {
@@ -354,8 +375,8 @@
     vkbeautify.prototype.xmlmin = function (text, preserveComments) {
 
         var str = preserveComments ? text
-                : text.replace(/\<![ \r\n\t]*(--([^\-]|[\r\n]|-[^\-])*--[ \r\n\t]*)\>/g, "")
-                .replace(/[ \r\n\t]{1,}xmlns/g, ' xmlns');
+            : text.replace(/\<![ \r\n\t]*(--([^\-]|[\r\n]|-[^\-])*--[ \r\n\t]*)\>/g, "")
+            .replace(/[ \r\n\t]{1,}xmlns/g, ' xmlns');
         return  str.replace(/>\s{0,}</g, "><");
     }
 
@@ -372,14 +393,14 @@
     vkbeautify.prototype.cssmin = function (text, preserveComments) {
 
         var str = preserveComments ? text
-                : text.replace(/\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g, "");
+            : text.replace(/\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g, "");
 
         return str.replace(/\s{1,}/g, ' ')
-                .replace(/\{\s{1,}/g, "{")
-                .replace(/\}\s{1,}/g, "}")
-                .replace(/\;\s{1,}/g, ";")
-                .replace(/\/\*\s{1,}/g, "/*")
-                .replace(/\*\/\s{1,}/g, "*/");
+            .replace(/\{\s{1,}/g, "{")
+            .replace(/\}\s{1,}/g, "}")
+            .replace(/\;\s{1,}/g, ";")
+            .replace(/\/\*\s{1,}/g, "/*")
+            .replace(/\*\/\s{1,}/g, "*/");
     }
 
     vkbeautify.prototype.sqlmin = function (text) {
